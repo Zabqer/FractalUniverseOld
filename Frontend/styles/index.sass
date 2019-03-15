@@ -1,0 +1,111 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto:400,500,700&subset=cyrillic")
+
+@import "settings"
+
+body
+  margin: 0
+  background-color: #EEEEEE
+
+header
+  position: absolute
+  display: flex
+  justify-content: space-between
+  top: 260px
+  z-index: 2
+  width: 100%
+  height: 50px
+  box-sizing: border-box
+  background-color: $primary-color
+  font-family: "Roboto", sans-serif
+  color: white
+  box-shadow: $primary-box-shadow
+  &.fixed
+    position: fixed
+    top: 0
+  nav
+    display: flex
+    flex-direction: row
+    padding: 10px
+    a
+      padding: 6px
+      border-radius: 2px
+      color: white
+      text-decoration: none
+      transition: $default-transition
+      &.active
+        font-weight: 500
+      &:hover
+        background: rgba(255, 255, 255, .2)
+      &:not(:first-child)
+        margin-left: 10px
+  .login-button
+    margin: 6px
+    button:hover
+      color: black
+      background-color: #DDDDDD
+
+.background
+  position: absolute
+  top: 0
+  width: 100%
+  height: 350px
+  overflow: hidden
+  img
+    object-fit: cover
+    width: 100%
+    height: 100%
+
+.page
+  position: relative
+  margin: 250px 16px 16px 16px
+  padding: 70px 10px 10px 10px
+  min-height: calc(100vh - 286px)
+  border-radius: 6px
+  background-color: white
+  box-shadow: $container-box-shadow
+
+footer
+  font-family: "Roboto", sans-serif
+  font-size: 12px
+  padding: 10px
+  background-color: white
+
+.popup-overlay
+  z-index: 1000
+  position: fixed
+  top: 0
+  left: 0
+  max-width: 100%
+  max-height: 100%
+  width: 100%
+  height: 100%
+  display: flex
+  justify-content: center
+  align-items: center
+  background-color: rgba(0, 0, 0, .4)
+
+.popup
+  position: relative
+  margin-top: 20px
+  padding-top: 40px
+  min-width: 350px
+  border-radius: 6px
+  background-color: white
+  box-shadow: $container-box-shadow
+  .header
+    position: absolute
+    top: -20px
+    left: 5%
+    display: flex
+    justify-content: center
+    align-items: center
+    z-index: 2
+    width: 90%
+    font-weight: 500
+    font-size: 20px
+    height: 50px
+    border-radius: 2px
+    background-color: #9c27b0
+    font-family: "Roboto", sans-serif
+    color: white
+    box-shadow: $primary-box-shadow

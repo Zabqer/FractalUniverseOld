@@ -1,0 +1,47 @@
+@import "../settings"
+
+.authorize
+  .login-form
+    display: flex
+    flex-direction: column
+  .login-alternatives
+    margin: 10px
+    border-radius: 2px
+    background-color: #9c27b0
+    box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 12px -5px rgba(156,39,176,.46)
+    .icons
+      display: flex
+      flex-direction: row
+      div
+        cursor: pointer
+        margin: 6px
+        padding: 4px
+        width: 24px
+        height: 24px
+        border-radius: 2px
+        transition: all 300ms ease-in-out
+        &:hover
+          background-color: rgba(255, 255, 255, .2)
+      svg
+        fill: white
+    .text
+      padding: 10px
+      text-align: center
+      color: white
+      font-size: 14px
+      font-family: "Roboto", sans-serif
+      display: block
+      width: 100%
+  .google-captcha
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    display: flex
+    justify-content: center
+    align-items: center
+    border-radius: 6px
+    background-color: rgba(255, 255, 255, .8)
+    .g-recaptcha
+      margin: 20px

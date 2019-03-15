@@ -1,0 +1,42 @@
+@import "../settings"
+
+.checkbox-container
+  margin: 10px
+  display: flex
+  flex-direction: row
+  align-items: center
+  .checkbox
+    cursor: pointer
+    background: #EEEEEE
+    width: 24px
+    height: 24px
+    border-radius: 2px
+    &::before, &::after
+      content: ""
+      display: block
+      background: #9c27b0
+      transition: $default-transition
+    &::before
+      width: 0px
+      height: 3px
+      transform: translate(0px, 0px) rotate(0deg)
+    &::after
+      width: 0px
+      height: 3px
+      transform: translate(22px, 18px) rotate(0deg)
+  input
+    display: none
+  input:checked + .checkbox::before
+    width: 12px
+    height: 3px
+    transform: translate(1px, 15px) rotate(45deg)
+  input:checked + .checkbox::after
+    width: 17px
+    height: 3px
+    transform: translate(7px, 10px) rotate(-45deg)
+  .label
+    user-select: none
+    cursor: pointer
+    font-family: "Roboto", sans-serif
+    margin-left: 10px
+    font-size: 16px
