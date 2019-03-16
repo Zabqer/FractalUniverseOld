@@ -15,13 +15,16 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from FractalUniverse.api.auth import login, test
+from django.shortcuts import render
 
+def renderApp(request):
+    return render(request, "index.html")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/login", login),
-
-    path("api/test", test)
+    path("api/test", test),
+    re_path("^", renderApp),
 ]

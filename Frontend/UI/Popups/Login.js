@@ -40,8 +40,6 @@ export default class LoginPopup extends Component {
               <Checkbox label="Запомнить меня" name="rememberMe" parent={this} />
               <Button onClick={() => {
                 this.setState({ stage: "captcha" });
-              }} onClick={async () => {
-                console.log(await window.FU.login(this.state.login, this.state.password, this.state.rememberMe, null));
               }}>
                 Войти
               </Button>

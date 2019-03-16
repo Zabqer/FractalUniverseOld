@@ -1,16 +1,14 @@
 const apiUrl = "http://localhost:8000/api";
 
-function api(endpoint, method, data) {
-  async function api(endpoint, method, data) {
-    return await (await fetch(`${apiUrl}/${endpoint}${method == "GET" ? "?" + new URLSearchParams(data) : ""}`, {
-      headers: {
-        "Accept": method != "GET" && data ? "application/json" : null,
-        "Content-Type": method != "GET" && data ? "application/json" : null
-      },
-      body: method != "GET" && data ? JSON.stringify(data) : null,
-      method
-    })).json();
-  }
+async function api(endpoint, method, data) {
+  return await (await fetch(`${apiUrl}/${endpoint}${method == "GET" ? "?" + new URLSearchParams(data) : ""}`, {
+    headers: {
+      "Accept": method != "GET" && data ? "application/json" : null,
+      "Content-Type": method != "GET" && data ? "application/json" : null
+    },
+    body: method != "GET" && data ? JSON.stringify(data) : null,
+    method
+  })).json();
 }
 
 export default {
@@ -31,6 +29,8 @@ export default {
       remember,
       captcha
     });
-    console.log(data)
+    if (data.token) {
+      this.token = data.token;
+    }
   }
 }
