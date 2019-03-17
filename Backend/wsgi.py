@@ -1,7 +1,8 @@
 import os
 import sys
+from os.path import expanduser
 
-path = "~/FractalUniverse/"
+path = expanduser("~") + "/FractalUniverse/Backend/"
 if path not in sys.path:
     sys.path.insert(0, path)
 
