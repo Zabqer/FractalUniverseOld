@@ -1,0 +1,65 @@
+@import "../settings"
+
+.color-picker-container
+  z-index: 999
+  width: 250px
+  height: 230px
+  position: absolute
+  top: 75%
+  left: 50%
+  border-radius: 2px
+  color: black
+  background-color: white
+  box-shadow: $container-box-shadow
+  transform: translate(-50%, 0)
+  .triangle
+    position: absolute
+    top: -10px
+    left: 50%
+    width: 0
+    height: 0
+    border-left: 10px solid transparent
+    border-right: 10px solid transparent
+    border-bottom: 10px solid white
+    transform: translateX(-50%)
+  .picker
+    cursor: pointer
+    position: relative
+    width: 250px
+    height: 150px
+    user-select: none
+    div
+      border-radius: 2px
+      position: absolute
+      width: 100%
+      height: 100%
+    .bg-color-white
+      background-image: linear-gradient(to right, #fff 0%, rgba(255,255,255,0) 100%)
+    .bg-color-black
+      background-image: linear-gradient(to bottom, transparent 0%, #000 100%)
+    .picker-curcle
+      pointer-events: none
+      position: absolute
+      width: 12px
+      height: 12px
+      border-radius: 12px
+      border: 4px solid white
+      box-shadow: $container-box-shadow
+  .hue-slider
+    border-radius: 2px
+    margin: 5px
+    cursor: pointer
+    position: relative
+    height: 16px
+    background-image: linear-gradient(to right,hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%), hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%))
+    .thumb
+      pointer-events: none
+      position: absolute
+      top: -2px
+      width: 12px
+      height: 12px
+      border-radius: 12px
+      border: 4px solid white
+      box-shadow: $container-box-shadow
+  .input-container
+    margin: 2px

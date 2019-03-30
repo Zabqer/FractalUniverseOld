@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from django.utils.translation import ugettext_lazy as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -7,7 +8,7 @@ SECRET_KEY = "7aiuz#h#c$n*3adaaxk%lxw1t7o-onj!08g@-kb3!yrzm^8h&o"
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["zabqer.pythonanywhere.com"]
+ALLOWED_HOSTS = ["localhost", "zabqer.pythonanywhere.com"]
 
 AUTH_USER_MODEL = "FractalUniverse.User"
 
@@ -27,11 +28,23 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    'django.middleware.locale.LocaleMiddleware',
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+LANGUAGES = (
+    ("ru", _("Russian")),
+    ("en", _("English")),
+)
+
+LANGUAGE_CODE = "en"
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, "locale"),
+)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -85,8 +98,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
 
 USE_I18N = True
@@ -97,7 +108,12 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+if os.environ.get("WSGI") == "True":
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+else:
+    STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, "static"),
+    )
 
 # FractalUniverse
 

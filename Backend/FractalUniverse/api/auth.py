@@ -11,14 +11,15 @@ from rest_framework.status import (
 from rest_framework.response import Response
 from ..serializers import UserSigninSerializer
 from ..models import User, Token
+from django.utils.translation import gettext as _
+from .. import utils
 
 @csrf_exempt
-@api_view(["GET"])
+@api_view(["POST"])
 @permission_classes((IsAuthenticated,))
-def test(request):
-    return Response({
-        "okay": True
-    }, status = HTTP_200_OK)
+def logout(request):
+    request.auth.delete()
+    return Response({}, status = HTTP_200_OK)
 
 @csrf_exempt
 @api_view(["POST"])
@@ -28,16 +29,18 @@ def login(request):
     serializer.is_valid(raise_exception=True)
     if not User.objects.filter(login = serializer.data["login"]).exists():
         return Response({
-            "login": "User not found."
+            "login": _("User not found.")
         }, status = HTTP_404_NOT_FOUND)
     user = authenticate(username = serializer.data["login"], password = serializer.data["password"])
     if not user:
         return Response({
-            "password": "Wrong password."
+            "password": _("Wrong password.")
         }, status = HTTP_404_NOT_FOUND)
     remember = serializer.data["remember"]
     token = Token.objects.create(user = user, remember = remember)
     print("[/api/auth/login] User " + str(user.login) + " logged in as token " + str(token.key));
     return Response({
-        "token": token.key
+        "token": token.key,
+        "expire_at": token.expire_at,
+        "user": utils.userInfo(user, True)
     }, status = HTTP_200_OK)

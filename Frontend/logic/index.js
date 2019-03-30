@@ -13,10 +13,10 @@ import "../styles/index.sass";
 
 window.FU = FractalUniverse;
 
-FractalUniverse.init();
-
-ReactDOM.render((
-    <Router>
-      <UI />
-    </Router>
-), document.getElementById("app"));
+FractalUniverse.init().then(() => {
+  ReactDOM.render((
+      <Router>
+        <UI />
+      </Router>
+  ), document.getElementById("app"));
+});

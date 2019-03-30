@@ -12,11 +12,12 @@ export default class Input extends Component {
   render() {
     return (
       <div className="input-container">
-        <input id={this.id} name={this.props.name} type={this.props.type} autoComplete={this.props.autoComplete} placeholder=" " value={this.props.parent.state[this.props.name]} onChange={({ target }) => {
+        <input id={this.id} pattern={this.props.pattern} name={this.props.name} type={this.props.type} autoComplete={this.props.autoComplete} placeholder=" " value={this.props.parent.state[this.props.name]} min={this.props.min} onChange={({ target }) => {
           this.props.parent.setState({
             [this.props.name]: target.value,
             [this.props.name + "Error"]: null
           });
+          this.props.onChange && this.props.onChange(target.value);
         }} />
         <label htmlFor={this.id}> { this.props.placeholder } </label>
         <div className="line"></div>

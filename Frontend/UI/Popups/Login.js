@@ -34,16 +34,17 @@ export default class LoginPopup extends Component {
           Вход
         </div>
           <div>
-            <div className="login-form">
-              <Input placeholder="Логин" type="email" name="login" autoComplete="email" parent={this} />
+            <form className="login-form">
+              <Input placeholder="Логин" type="text" name="login" autoComplete="login" parent={this} />
               <Input placeholder="Пароль" type="password" name="password" autoComplete="password" parent={this} />
               <Checkbox label="Запомнить меня" name="rememberMe" parent={this} />
-              <Button onClick={() => {
+              <Button onClick={(event) => {
+                event.preventDefault();
                 this.setState({ stage: "captcha" });
               }}>
                 Войти
               </Button>
-            </div>
+            </form>
             <div className="login-alternatives">
               <span className="text"> Или войти через </span>
               <div className="icons">
@@ -73,14 +74,13 @@ export default class LoginPopup extends Component {
                     if (result === true) {
                       window.hidePopup();
                     } else {
-                      if (result === "WRONG_LOGIN") {
-                        this.setState({ loginError: "Такой аккаунт не зарегистрирован", stage: "form" });
-                      } else if (result === "WRONG_PASSWORD") {
-                        this.setState({ passwordError: "Неправильный пароль", stage: "form" });
-                      } else {
-                        this.setState({ stage: "form" });
-                        console.error("Login error", result);
+                      if (result.login) {
+                        this.setState({ loginError: result.login });
                       }
+                      if (result.password) {
+                        this.setState({ passwordError: result.password });
+                      }
+                      this.setState({ stage: "form" });
                     }
                   }}
                 />

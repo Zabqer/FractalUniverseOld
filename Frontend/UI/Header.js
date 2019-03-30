@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Route, Link } from "react-router-dom";
 
 import Button from "./Elements/Button";
+import AsyncButton from "./Elements/AsyncButton";
 
 import LoginPopup from "./Popups/Login";
 
@@ -35,7 +36,7 @@ export default class Header extends Component {
       <header className={`header${this.state.fixed ? " fixed" : ""}`} ref={this.header}>
         <nav>
           <Link to="/" className="active">
-            Главаная
+            { gettext("Main") }
           </Link>
           <Link to="/test">
             Test
@@ -44,17 +45,18 @@ export default class Header extends Component {
         { window.FU.loggedAs ? (
           <div style={{display: "flex"}}>
             Logged as { window.FU.loggedAs.login }
-            <Button className="login-button" onClick={() => {
-              window.FU.logout();
-            }}>
-              Выйти
-            </Button>
+            <Link to="/profile">
+              Profile
+            </Link>
+            <AsyncButton className="login-button" onClick={() => window.FU.logout()}>
+              { gettext("Logout") }
+            </AsyncButton>
           </div>
         ) : (
           <Button className="login-button" onClick={() => {
             window.showPopup(<LoginPopup />);
           }}>
-            Вход
+            { gettext("Login") }
           </Button>) }
       </header>
     );

@@ -47,7 +47,7 @@ export default class UI extends Component {
         <ReactCSSTransitionGroup transitionName="popup-overlay" transitionEnterTimeout={300} transitionLeaveTimeout={150}>
           { this.state.popups.map((popup, index) => {
             return (
-              <div key={index} className="popup-overlay" onClick={({ target }) => {
+              <div key={index} className="popup-overlay" onMouseDown={({ target }) => {
                 if (target.classList.contains("popup-overlay")) {
                   window.hidePopup();
                 }
@@ -63,11 +63,14 @@ export default class UI extends Component {
         </Parallax>
         <Header />
         <div className="page">
-          <Switch>
-            <Route exact path="/" component={Images} />
-            <Route path="/profile/:id" component={Profile} />
-            <Route component={NotFound} />
-          </Switch>
+          <ReactCSSTransitionGroup transitionName="page-change" transitionEnterTimeout={300} transitionLeaveTimeout={150}>
+            <Switch>
+              <Route exact path="/" component={Images} />
+              <Route path="/profile" component={Profile} />
+              <Route path="/profile/:id" component={Profile} />
+              <Route component={NotFound} />
+            </Switch>
+          </ReactCSSTransitionGroup>
         </div>
         <footer className="footer">
           Made by Zabqer with love

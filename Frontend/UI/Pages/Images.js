@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 
+import AsyncButton from "../Elements/AsyncButton";
+
 import "../../styles/Pages/Images.sass";
 
 export default class Images extends Component {

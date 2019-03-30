@@ -5,17 +5,24 @@
   margin: 10px
   button
     padding: 10px
-    width: 100%
-    height: 100%
     cursor: pointer
     border-radius: 2px
     outline: none
     font-size: 16px
     font-family: "Roboto", sans-serif
     border: none
-    background-color: #EEEEEE
+    background-color: transparent
     transition: $default-transition
     &:hover
+      background-color: #EEEEEE
+
+
+.button-container:not(.withIcon)
+  button
+    width: 100%
+    height: 100%
+    background-color: #EEEEEE
+    &:not(:disabled):hover
       color: white
       background-color: #9c27b0
       box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 12px -5px rgba(156,39,176,.46)

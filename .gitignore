@@ -1,4 +1,4 @@
 Frontend/node_modules/
-Backend/db.sqlite3/
+Backend/db.sqlite3
 __pycache__/
 *.py[cod]
