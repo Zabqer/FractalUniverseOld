@@ -92,10 +92,23 @@ export default {
       gradations
     });
   },
+  async editPalette(id, name, colors, gradations) {
+    console.log("[FractalUniverse] editPalette");
+    return await this.api("user/palettes", "PATCH", {
+      id,
+      name,
+      colors,
+      gradations
+    });
+  },
   async deletePalette(id) {
     console.log("[FractalUniverse] deletePalette");
     return await this.api("user/palettes", "DELETE", {
       id
     });
+  },
+  async getLatestFractals() {
+    console.log("[FractalUniverse] getLatestFractals");
+    return await this.api("fractals/latest", "GET");
   }
 }

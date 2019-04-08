@@ -8,6 +8,8 @@ from django.core.validators import int_list_validator
 from django.utils.translation import ugettext_lazy as _
 import binascii
 import os
+import hashlib
+from .fractal_utils import task_manager
 
 from .managers import UserManager
 
@@ -53,7 +55,6 @@ class Token(models.Model):
         return self.key
 
 class Palette(models.Model):
-    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="palettes",
         on_delete=models.CASCADE, verbose_name="user"
@@ -65,3 +66,50 @@ class Palette(models.Model):
         verbose_name = "palette"
         verbose_name_plural = "palettes"
         unique_together = ("id", "user")
+
+class Universe(models.Model):
+    function = models.TextField(max_length=200)
+    initial_value = models.TextField(max_length=40)
+
+class Dimension(models.Model):
+    universe = models.ForeignKey(
+        "Universe", related_name="dimensions",
+        on_delete=models.CASCADE, verbose_name="universe"
+    )
+    params = models.TextField(max_length=40)
+
+class Fractal(models.Model):
+    STATE_UNKNOWN = 0
+    STATE_IN_QUEUE = 1
+    STATE_CALCULATING = 2
+    STATE_READY = 3
+    STATES = (
+        (STATE_UNKNOWN, "UNKNOWN"),
+        (STATE_IN_QUEUE, "IN_QUEUE"),
+        (STATE_CALCULATING, "CALCULATING"),
+        (STATE_READY, "READY")
+    )
+    palette = models.ForeignKey(
+        "Palette", related_name="fractals",
+        on_delete=models.CASCADE, verbose_name="palette"
+    )
+    state = models.IntegerField(choices=STATES, default=0)
+    dimension = models.ForeignKey(
+        "Dimension", related_name="fractals",
+        on_delete=models.CASCADE, verbose_name="dimension"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    width = models.IntegerField()
+    height = models.IntegerField()
+    file_id = models.TextField(max_length=40, null=True)
+    image_url = models.URLField(null=True)
+    class Meta:
+        verbose_name = "fractal"
+        verbose_name_plural = "fractals"
+
+class FractalCalculateTask(models.Model):
+    fractal = models.ForeignKey(
+        "Fractal", related_name="fractalcalculatetasks",
+        on_delete=models.CASCADE, verbose_name="fractal"
+    )
+    startTime = models.DateTimeField("startTime", auto_now_add=True)

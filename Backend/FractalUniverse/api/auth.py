@@ -42,5 +42,5 @@ def login(request):
     return Response({
         "token": token.key,
         "expire_at": token.expire_at,
-        "user": utils.userInfo(user, True)
+        "user": utils.user_info(user, True)
     }, status = HTTP_200_OK)

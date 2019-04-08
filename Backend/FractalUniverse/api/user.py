@@ -8,7 +8,7 @@ from rest_framework.status import (
 )
 from ..models import User, Palette
 import ast
-from ..serializers import UserPostPlalette, UserDeletePlalette
+from ..serializers import UserPostPlalette, UserDeletePlalette, UserEditPlalette
 from django.utils.translation import gettext as _
 from .. import utils
 
@@ -17,25 +17,44 @@ from .. import utils
 @permission_classes((IsAuthenticated,))
 def info(request, id=None):
     if id is None:
-        return Response(utils.userInfo(request.user, True), status = HTTP_200_OK)
+        return Response(utils.user_info(request.user, True), status = HTTP_200_OK)
     user = User.objects.get(id = id);
     if not user:
         return Response({
             "detail": _("User not found.")
         }, status = HTTP_404_NOT_FOUND)
     if request.user.id == id:
-        return Response(utils.userInfo(user, True), status = HTTP_200_OK)
+        return Response(utils.user_info(user, True), status = HTTP_200_OK)
     else:
-        return Response(utils.userInfo(user, True), status = HTTP_200_OK)
+        return Response(utils.user_info(user, True), status = HTTP_200_OK)
 
 @csrf_exempt
-@api_view(["GET", "POST", "DELETE"])
+@api_view(["GET", "POST", "PATCH", "DELETE"])
 @permission_classes((IsAuthenticated,))
 def palettes(request):
     if request.method == "POST":
         serializer = UserPostPlalette(data = request.data)
         serializer.is_valid(raise_exception=True)
         palette = Palette.objects.create(user = request.user, name = serializer.data["name"], colors = serializer.data["colors"], gradations= serializer.data["gradations"])
+        palette.save()
+        return Response({
+            "success": True,
+            "id": palette.id,
+            "name": palette.name,
+            "colors": palette.colors,
+            "gradations": palette.gradations
+        }, status = HTTP_200_OK)
+    elif request.method == "PATCH":
+        serializer = UserEditPlalette(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        palette = Palette.objects.get(id = serializer.data["id"])
+        if palette is None:
+            return Response({
+                "detail": _("Palette not found.")
+            }, status = HTTP_404_NOT_FOUND)
+        palette.name = serializer.data["name"]
+        palette.colors = serializer.data["colors"]
+        palette.gradations = serializer.data["gradations"]
         palette.save()
         return Response({
             "success": True,

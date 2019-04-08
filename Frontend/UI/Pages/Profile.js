@@ -26,7 +26,7 @@ function generatePallete(array, callback) {
   });
 }
 
-function generateGradation(from, to, steps, skipFirst) {
+function generateGradation(from, to, steps) {
   let colors = []
   let alpha = 0;
   for (let j = 0; j < steps; j++) {
@@ -50,6 +50,7 @@ class EditPalettePopup extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      id: this.props.palette.id,
       name: this.props.palette.name,
       colors: this.props.palette.colors,
       gradations: this.props.palette.gradations,
@@ -110,7 +111,12 @@ class EditPalettePopup extends Component {
         </div>
         <div className="buttons">
           <AsyncButton onClick={async () => {
-            let result = await window.FU.addPalette(this.state.name, this.state.colors, this.state.gradations);
+            let result;
+            if (this.state.id) {
+              result = await window.FU.editPalette(this.state.id, this.state.name, this.state.colors, this.state.gradations);
+            } else {
+              result = await window.FU.addPalette(this.state.name, this.state.colors, this.state.gradations);
+            }
             if (!result.success) {
               if (result.name) {
                 this.setState({ nameError: result.name });
@@ -150,75 +156,98 @@ export default class Profile extends Component {
           </div>
           <div className="user-info">
             <div className="login">
-              Zabqer
+              { window.FU.loggedAs.login }
             </div>
             <div className="email">
-              zabqer@gmail.com
+              { window.FU.loggedAs.email }
             </div>
           </div>
           <div className="premium-badget">
             { gettext("Premium") }
           </div>
         </div>
-        <div className="profile-settings">
-          <div className="list-palettes">
-            <h2 className="description">
-              { gettext("Your palettes") }
-            </h2>
-            <div className="list">
-              { this.state.palettes ? (
-                this.state.palettes.map((palette, index) => {
-                  return (
-                    <div className="palette" key={index}>
-                      <div className="name">
-                        { palette.name }
-                      </div>
-                      <div className="palette-view">
-                        <div className="gradation">
-                          { generatePallete(generateGradations(palette.colors, Number(palette.gradations) + 1), (color, textColor, index) => {
-                            return (
-                              <div key={index} style={{backgroundColor: "#" + color, color: "#" + textColor}}> </div>
-                            );
-                          }) }
-                        </div>
-                        <AsyncButton onClick={async () => {
-                          let result = await window.FU.deletePalette(palette.id);
-                          if (!result.detail) {
-                            this.setState((old) => {
-                              let index;
-                              for (let i in old.palettes) {
-                                if (old.palettes[i] == palette.id) {
-                                  index = i;
-                                  break;
-                                }
-                              }
-                              old.palettes.splice(index, 1);
-                              return old;
-                            });
-                          }
-                        }}>
-                          D
-                        </AsyncButton>
-                      </div>
+        <div className="list-palettes">
+          <h2 className="description">
+            { gettext("Your palettes") }
+          </h2>
+          <div className="list">
+            { this.state.palettes ? (
+              this.state.palettes.map((palette, index) => {
+                return (
+                  <div className="palette" key={index}>
+                    <div className="name">
+                      { palette.name }
                     </div>
-                  )
-                })
-              ) : null }
-              <Button onClick={() => {
-                window.showPopup(<EditPalettePopup palette={{name: "", colors: [0x000000, 0xFF0000, 0x00FF00, 0x0000FF, 0xFFFFFF], gradations: 10}} onSave={async (result) => {
-                  this.setState((old) => {
-                    old.palettes.push({
-                      id: result.id,
-                      name: result.name,
-                      colors: result.colors,
-                      gradations: result.gradations
-                    })
-                    return old;
-                  });
-                }}/>);
-              }}>
-                { gettext("Add") }
-              </Button>
+                    <div className="palette-view">
+                      <div className="gradation">
+                        { generatePallete(generateGradations(palette.colors, Number(palette.gradations) + 1), (color, textColor, index) => {
+                          return (
+                            <div key={index} style={{backgroundColor: "#" + color, color: "#" + textColor}}> </div>
+                          );
+                        }) }
+                      </div>
+                      <Button onClick={() => {
+                        window.showPopup(<EditPalettePopup palette={{id: palette.id, name: palette.name, colors: palette.colors, gradations: palette.gradations}} onSave={async (result) => {
+                          this.setState((old) => {
+                            old.palettes[index] = {
+                              id: result.id,
+                              name: result.name,
+                              colors: result.colors,
+                              gradations: result.gradations
+                            }
+                            return old;
+                          });
+                        }}/>);
+                      }}>
+                        E
+                      </Button>
+                      <AsyncButton onClick={async () => {
+                        let result = await window.FU.deletePalette(palette.id);
+                        if (!result.detail) {
+                          this.setState((old) => {
+                            let index;
+                            for (let i in old.palettes) {
+                              if (old.palettes[i].id == palette.id) {
+                                index = i;
+                                break;
+                              }
+                            }
+                            old.palettes.splice(index, 1);
+                            return old;
+                          });
+                        }
+                      }}>
+                        D
+                      </AsyncButton>
+                    </div>
+                  </div>
+                )
+              })
+            ) : null }
+            <Button onClick={() => {
+              window.showPopup(<EditPalettePopup palette={{name: "", colors: [0xFFFFFF], gradations: 0}} onSave={async (result) => {
+                this.setState((old) => {
+                  old.palettes.push({
+                    id: result.id,
+                    name: result.name,
+                    colors: result.colors,
+                    gradations: result.gradations
+                  })
+                  return old;
+                });
+              }}/>);
+            }}>
+              { gettext("Add") }
+            </Button>
+          </div>
+        </div>
+        <div className="list-tasks">
+          <h2 className="description">
+            { gettext("Your tasks") }
+          </h2>
+          <div className="list">
+            <div className="task">
+              Task
             </div>
           </div>
         </div>
