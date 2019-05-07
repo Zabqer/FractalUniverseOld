@@ -17,10 +17,9 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
-    # "django.contrib.messages",
+    "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    # "rest_framework.authtoken",
     "FractalUniverse"
 ]
 
@@ -29,7 +28,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     'django.middleware.locale.LocaleMiddleware',
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -122,6 +121,6 @@ GRECAPTCHA_PRIVATE_KEY = "6Ld_dZYUAAAAAFNGKcVLH0nA3OwcJf0BVZD-2H8r"
 TOKEN_LIFETIME = timedelta(hours=1)
 REMEBERED_TOKEN_LIFETIME = timedelta(weeks=1)
 
-GOOGLE_API_AUTH_FILE = os.path.join(BASE_DIR, "FractalUniverse-a22726537cdc.json")
+GOOGLE_API_AUTH_FILE = os.path.join(BASE_DIR, "GoogleServiceAccount.json")
 
-CALCULATOR_THREAD_COUNT = 10
+CALCULATOR_THREAD_COUNT = 1

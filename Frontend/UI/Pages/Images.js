@@ -18,17 +18,18 @@ export default class Images extends Component {
   render() {
     return (
       <div className="images-page">
-        <h2>
-          { gettext("Latest") }
-        </h2>
-        <div className="images">
-          { this.state.latestFractals ? this.state.latestFractals.map((fractal, index) => {
-            return (
-              <img key={index} src={fractal.imageUrl} />
-            );
-          }) : null }
-        </div>
       </div>
     )
   }
 }
+
+// <h2>
+//   { gettext("Latest") }
+// </h2>
+// <div className="images">
+//   { this.state.latestFractals ? this.state.latestFractals.map((fractal, index) => {
+//     return (
+//       <img key={index} src={fractal.imageUrl} />
+//     );
+//   }) : null }
+// </div>

@@ -35,10 +35,12 @@ export default {
     }
     // Получаем информацию о пользователе
     if (this.token) {
-      let user = await this.api("user/info", "GET");
+      let user = await this.api("user", "GET");
       if (!user.id) {
         this.token = null;
         this.expireAt = null;
+        localStorage.removeItem("token");
+        localStorage.removeItem("expire_at");
       } else {
         this.loggedAs = user;
         console.log("[FractalUniverse] logged as", this.loggedAs);
@@ -46,7 +48,7 @@ export default {
     }
   },
   async login(login, password, remember, captcha) {
-    console.log("[FractalUniverse] login");
+    console.log("[FractalUniverse] login", arguments);
     if (this.loggedAs) {
       console.error("[FractalUniverse] arleady logged in");
       return false;
@@ -67,7 +69,7 @@ export default {
     return data;
   },
   async logout() {
-    console.log("[FractalUniverse] logout");
+    console.log("[FractalUniverse] logout", arguments);
     if (!this.loggedAs) {
       console.error("[FractalUniverse] not logged in");
       return false;
@@ -81,19 +83,19 @@ export default {
     return true;
   },
   async getPalettes() {
-    console.log("[FractalUniverse] getPalettes");
+    console.log("[FractalUniverse] getPalettes", arguments);
     return await this.api("user/palettes", "GET");
   },
   async addPalette(name, colors, gradations) {
-    console.log("[FractalUniverse] addPalette");
-    return await this.api("user/palettes", "POST", {
+    console.log("[FractalUniverse] addPalette", arguments);
+    return await this.api("palettes", "POST", {
       name,
       colors,
       gradations
     });
   },
   async editPalette(id, name, colors, gradations) {
-    console.log("[FractalUniverse] editPalette");
+    console.log("[FractalUniverse] editPalette", arguments);
     return await this.api("user/palettes", "PATCH", {
       id,
       name,
@@ -102,13 +104,53 @@ export default {
     });
   },
   async deletePalette(id) {
-    console.log("[FractalUniverse] deletePalette");
+    console.log("[FractalUniverse] deletePalette", arguments);
     return await this.api("user/palettes", "DELETE", {
       id
     });
   },
   async getLatestFractals() {
-    console.log("[FractalUniverse] getLatestFractals");
+    console.log("[FractalUniverse] getLatestFractals", arguments);
     return await this.api("fractals/latest", "GET");
-  }
+  },
+  async getUniverses() {
+    console.log("[FractalUniverse] getUniverses", arguments);
+    return await this.api("universes", "GET");
+  },
+  async addUniverse(f) {
+    console.log("[FractalUniverse] addUniverse", arguments);
+    return await this.api("universes", "POST", {
+      function: f
+    });
+  },
+  async editUniverse(id, f) {
+    console.log("[FractalUniverse] addUniverse", arguments);
+    return await this.api("universes/" + id, "PUT", {
+      function: f
+    });
+  },
+  async deleteUniverse(id) {
+    console.log("[FractalUniverse] deleteUniverse", arguments);
+    return await this.api("universes/" + id, "DELETE");
+  },
+  async getDimensions(universe) {
+    console.log("[FractalUniverse] getDimensions", arguments);
+    return await this.api("universes/" + universe + "/dimensions", "GET");
+  },
+  async addDimension(universe, parameter) {
+    console.log("[FractalUniverse] addDimension", arguments);
+    return await this.api("universes/" + universe + "/dimensions", "POST", {
+      parameter
+    });
+  },
+  async editDimension(id, parameter) {
+    console.log("[FractalUniverse] editDimension", arguments);
+    return await this.api("dimensions/" + id, "PUT", {
+      parameter
+    });
+  },
+  async deleteDimension(id) {
+    console.log("[FractalUniverse] deleteDimension", arguments);
+    return await this.api("dimensions/" + id, "DELETE");
+  },
 }

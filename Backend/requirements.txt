@@ -1,2 +1,4 @@
 djangorestframework
 django
+google-api-python-client
+pillow

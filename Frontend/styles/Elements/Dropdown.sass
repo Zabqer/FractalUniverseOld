@@ -1,0 +1,56 @@
+@import "../settings"
+
+.dropdown-container
+  min-width: 200px
+  position: relative
+  font-family: "Roboto", sans-serif
+  display: inline-block
+  .dropdown-header
+    position: relative
+    font-size: 14px
+    cursor: pointer
+    padding: 10px
+    border-radius: 2px
+    display: inline-block
+    background-color: #EEEEEE
+    display: flex
+    flex-direction: row
+    justify-content: center
+    align-items: center
+    transition: $default-transition
+    &:hover
+      background-color: #DDDDDD
+    .element
+      margin-top: 20px
+    .placeholder
+      top: 6px
+      left: 6px
+      position: absolute
+      font-size: 12px
+  .dropdown-content
+    z-index: 2
+    background-color: white
+    position: absolute
+    border-radius: 2px
+    width: 100%
+    font-size: 12px
+    box-shadow: $low-container-box-shadow
+    top: 50%
+    max-height: 0
+    overflow-y: auto
+    transition: $default-transition
+    .element
+      border-radius: 2px
+      cursor: pointer
+      padding: 10px
+      transition: $default-transition
+      &:hover
+        background-color: #EEEEEE
+  &.dropped
+    .dropdown-content
+      top: 0
+      transform: translateY(-25%)
+      max-height: 200px
+  &.disabled
+    pointer-events: none
+    opacity: .5

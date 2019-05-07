@@ -57,33 +57,43 @@
       .email
         font-size: 18px
         padding: 5px
-    .premium-badget
-      cursor: default
+    .badgets
       position: absolute
       top: 5px
       right: 5px
-      padding: 5px
-      font-weight: 500
-      border-radius: 2px
-      background-color: #F57F17
-      box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 12px -5px rgba(245,127,23,.46)
-      overflow: hidden
-      &::after, &::before
-        z-index: 0
-        opacity: .3
-        content: ""
-        position: absolute
-        transform: skew(-25deg)
-        top: 0
-        left: -50%
-        display: block
-        width: 30%
-        height: 100%
-        background-color: white
-        animation: premium-light-sweep 3s ease-in-out infinite
-      &::before
-        opacity: .2
-        animation-delay: 50ms
+      display: flex
+      flex-direction: column
+      align-items: flex-end
+      div
+        margin-bottom: 5px
+        position: relative
+        cursor: default
+        padding: 5px
+        font-weight: 500
+        border-radius: 2px
+        overflow: hidden
+        &::after, &::before
+          z-index: 0
+          opacity: .3
+          content: ""
+          position: absolute
+          transform: skew(-25deg)
+          top: 0
+          left: -50%
+          display: block
+          width: 30%
+          height: 100%
+          background-color: white
+          animation: premium-light-sweep 3s ease-in-out infinite
+        &::before
+          opacity: .2
+          animation-delay: 50ms
+      .premium-badget
+        background-color: #F57F17
+        box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 12px -5px rgba(245,127,23,.46)
+      .admin-badget
+        background-color: #b71c1c
+        box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 12px -5px rgba(183,28,28,.46)
   .list-palettes
     grid-area: list-palettes
     color: $text-color

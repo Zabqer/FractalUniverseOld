@@ -148,22 +148,32 @@ export default class Profile extends Component {
     this.setState({ palettes: await window.FU.getPalettes() });
   }
   render() {
+    let user = window.FU.loggedAs;
     return (
       <div className="profile-page">
         <div className="user-profile">
           <div className="user-avatar">
-            <img src={window.FU.loggedAs.avatar} />
+            <img src={ user.avatar } />
           </div>
           <div className="user-info">
             <div className="login">
-              { window.FU.loggedAs.login }
+              { user.login }
             </div>
             <div className="email">
-              { window.FU.loggedAs.email }
+              { user.email }
             </div>
           </div>
-          <div className="premium-badget">
-            { gettext("Premium") }
+          <div className="badgets">
+            { user.isPremium ? (
+                <div className="premium-badget">
+                  { gettext("Premium") }
+                </div>
+              ) : null }
+            { user.isAdmin ? (
+                <div className="admin-badget">
+                  { gettext("Admin") }
+                </div>
+              ) : null }
           </div>
         </div>
         <div className="list-palettes">

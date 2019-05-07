@@ -1,0 +1,20 @@
+@import "settings"
+
+.loadable
+  &>span
+    position: relative
+    .loader
+      min-width: 100%
+      min-height: 300px
+
+.loadable-enter
+  opacity: 0.01
+  &.loadable-enter-active
+    opacity: 1
+    transition: opacity 300ms ease-in
+
+.loadable-leave
+  opacity: 1
+  &.loadable-leave-active
+    opacity: 0.01
+    transition: opacity 150ms ease-in

@@ -133,3 +133,14 @@ footer
   &.popup-overlay-leave-active
     opacity: 0.01
     transition: opacity 150ms ease-in
+
+.rotable
+  transition: $default-transition
+  &.down
+    transform: rotate(180deg)
+
+.row
+  display: flex
+  flex-direction: row
+  // &>div
+    // flex: 1

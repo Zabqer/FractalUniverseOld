@@ -38,22 +38,22 @@ def fill_array(at, to, point_count):
         count = count + 1
     return arr
 
-# TODO: change eval to custom eval with AST parser
-def calculate(function, initial_value, params, width, height, max_step_count, meta):
-    # TEMP:
+def calculate(function, initial_value, parameter, x, y):
+    width = 200
+    height = 200
     x1 = -2
     x2 = 2
-    y1 = -2
-    y2 = 2
+    y1 = x1
+    y2 = x2
     int_limit = 0.01
     ext_limit = 100
-    # TEMP:
     step_map = []
     x_array = fill_array(x1, x2, width)
     y_array = fill_array(y1, y2, height)
     function = formula.compile(function)
     initial_value = formula.compile(initial_value)
-    (n, z) = [formula.compile(ex)() for ex in params.split(",")]
+    n = parameter
+    z = x + y * 1j
     i = j = v = 0
     for x in x_array:
         step_map.append([])
@@ -61,17 +61,58 @@ def calculate(function, initial_value, params, width, height, max_step_count, me
             v = initial_value(x = x, y = y)
             step = 0
             while ((abs(v) > int_limit) and (abs(v) < ext_limit)):
+                # if step >= max_step_count:
+                #     break
+                v = function(v = v, n = n, z = z)
+                step = step + 1
+            step_map[i].append(step)
+            j += 1
+        # meta["progress"] = round((i + 1) / width, 2)
+        print("Fractal progress " + str(round((i + 1) / width, 2)) + "    ", end="\r")
+        i += 1
+    return step_map
+
+def calculate_map(function, initial_value, parameter):
+    width = 600
+    height = 600
+    # TEMP:
+    x1 = -2
+    x2 = 2
+    y1 = -2
+    y2 = 2
+    int_limit = 0.01
+    ext_limit = 100
+    max_step_count = 30
+    # TEMP:
+    step_map = []
+    x_array = fill_array(x1, x2, width)
+    y_array = fill_array(y1, y2, height)
+    function = formula.compile(function)
+    initial_value = formula.compile(initial_value)
+    # n = parameter
+    n = 2
+    i = j = v = 0
+    for x in x_array:
+        step_map.append([])
+        for y in y_array:
+            v = 0
+            z = initial_value(x = x, y = y)
+            step = 0
+            while step == 0 or ((abs(v) > int_limit) and (abs(v) < ext_limit)):
                 if step >= max_step_count:
                     break
                 v = function(v = v, n = n, z = z)
                 step = step + 1
             step_map[i].append(step)
             j += 1
-        meta["progress"] = round((i + 1) / width, 2)
+        # meta["progress"] = round((i + 1) / width, 2)
+        print("Fractal progress " + str(round((i + 1) / width, 2) * 100) + "%    ", end="\r")
         i += 1
     return step_map
 
-def image_from_map(step_map, width, height, colors):
+def image_from_map(step_map, colors):
+    width = len(step_map[0])
+    height = len(step_map)
     color = colors[0]
     img = Image.new("RGB", (width, height), color)
     imgDrawer = ImageDraw.Draw(img)

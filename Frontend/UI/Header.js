@@ -38,8 +38,8 @@ export default class Header extends Component {
           <Link to="/" className="active">
             { gettext("Main") }
           </Link>
-          <Link to="/test">
-            Test
+          <Link to="/admin">
+            Admin
           </Link>
         </nav>
         { window.FU.loggedAs ? (

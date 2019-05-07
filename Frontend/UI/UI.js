@@ -5,9 +5,11 @@ import ReactCSSTransitionGroup from "react-addons-css-transition-group";
 import Header from "./Header";
 
 import Parallax from "./Elements/Parallax";
+import LoggedInRequired from "./LoggedInRequired";
 
 import Images from "./Pages/Images";
 import Profile from "./Pages/Profile";
+import Admin from "./Pages/Admin";
 import NotFound from "./Pages/NotFound";
 
 export default class UI extends Component {
@@ -59,7 +61,7 @@ export default class UI extends Component {
         </ReactCSSTransitionGroup>
         </div>
         <Parallax className="background">
-          <img src="/static/background.jpeg" width="100%" alt="" />
+          <img src="/static/background.jpeg" width="100%" alt="" draggable="false" />
         </Parallax>
         <Header />
         <div className="page">
@@ -67,7 +69,9 @@ export default class UI extends Component {
             <Switch>
               <Route exact path="/" component={Images} />
               <Route path="/profile" component={Profile} />
-              <Route path="/profile/:id" component={Profile} />
+              <LoggedInRequired isAdmin={true}>
+                <Route path="/admin" component={Admin} />
+              </LoggedInRequired>
               <Route component={NotFound} />
             </Switch>
           </ReactCSSTransitionGroup>

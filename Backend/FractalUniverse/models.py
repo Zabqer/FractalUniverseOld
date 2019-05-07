@@ -20,7 +20,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField("registered", auto_now_add=True)
     is_active = models.BooleanField("is_active", default=True)
     is_premium = models.BooleanField("is_premium", default=False)
-    is_staff = True
+    is_staff = models.BooleanField("is_staff", default=False)
     objects = UserManager()
     USERNAME_FIELD = "login"
     REQUIRED_FIELDS = ["email", "password"]
@@ -57,7 +57,8 @@ class Token(models.Model):
 class Palette(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="palettes",
-        on_delete=models.CASCADE, verbose_name="user"
+        on_delete=models.CASCADE, verbose_name="user",
+        blank=True, null=True
     )
     name = models.CharField("name", max_length=64)
     colors = models.CharField("colors", validators=(int_list_validator,), max_length=100)
@@ -67,18 +68,42 @@ class Palette(models.Model):
         verbose_name_plural = "palettes"
         unique_together = ("id", "user")
 
-class Universe(models.Model):
-    function = models.TextField(max_length=200)
-    initial_value = models.TextField(max_length=40)
+class Universe(models.Model): # Вселенная
+    function = models.TextField(max_length=200) # Формула для просчёта
+    initial_value = models.TextField(max_length=40) # Начальное значение для точки x+1j*y
 
-class Dimension(models.Model):
+class Dimension(models.Model): # Измерение
     universe = models.ForeignKey(
         "Universe", related_name="dimensions",
         on_delete=models.CASCADE, verbose_name="universe"
-    )
-    params = models.TextField(max_length=40)
+    ) # Указатель на вселенную
+    map = models.ForeignKey(
+        "Fractal", related_name="dimensions",
+        on_delete=models.CASCADE, verbose_name="fractal",
+        null=True
+    ) # Измерение
+    parameter = models.FloatField() # Параметр (переделал из строки под число)
+    class Meta():
+        verbose_name = "dimension"
+        verbose_name_plural = "dimensions"
 
 class Fractal(models.Model):
+    dimension = models.ForeignKey(
+        "Dimension", related_name="fractals",
+        on_delete=models.CASCADE, verbose_name="dimension"
+    ) # Измерение
+    x = models.FloatField() # Коардинаты
+    y = models.FloatField() # т.е v=x+y*1j
+    default_drawable = models.ForeignKey(
+        "Drawable", related_name="fractals",
+        on_delete=models.CASCADE, verbose_name="drawable",
+        null=True
+    ) # Дефолтный Drawable
+    class Meta:
+        verbose_name = "fractal"
+        verbose_name_plural = "fractals"
+
+class Drawable(models.Model):
     STATE_UNKNOWN = 0
     STATE_IN_QUEUE = 1
     STATE_CALCULATING = 2
@@ -89,23 +114,22 @@ class Fractal(models.Model):
         (STATE_CALCULATING, "CALCULATING"),
         (STATE_READY, "READY")
     )
+    state = models.IntegerField(choices=STATES, default=0) # Статус фрактала (или карты)
+    fractal = models.ForeignKey(
+        "Fractal", related_name="drawables",
+        on_delete=models.CASCADE, verbose_name="fractal"
+    ) # Фрактал
     palette = models.ForeignKey(
-        "Palette", related_name="fractals",
+        "Palette", related_name="drawables",
         on_delete=models.CASCADE, verbose_name="palette"
-    )
-    state = models.IntegerField(choices=STATES, default=0)
-    dimension = models.ForeignKey(
-        "Dimension", related_name="fractals",
-        on_delete=models.CASCADE, verbose_name="dimension"
-    )
+    ) # Палитра
     created = models.DateTimeField(auto_now_add=True)
-    width = models.IntegerField()
-    height = models.IntegerField()
     file_id = models.TextField(max_length=40, null=True)
     image_url = models.URLField(null=True)
     class Meta:
-        verbose_name = "fractal"
-        verbose_name_plural = "fractals"
+        verbose_name = "drawable"
+        verbose_name_plural = "drawables"
+
 
 class FractalCalculateTask(models.Model):
     fractal = models.ForeignKey(

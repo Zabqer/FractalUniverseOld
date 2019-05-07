@@ -8,7 +8,7 @@ export default class Button extends Component {
   }
   render() {
     return (
-      <div className={`button-container ${this.props.classNam && this.props.className} ${this.props.withIcon && "withIcon"}`}>
+      <div className={`button-container ${this.props.className && this.props.className} ${this.props.withIcon && "withIcon"} ${this.props.disabled ? "disabled" : ""}`}>
         <button onClick={(event) => {
           this.props.onClick && this.props.onClick(event);
         }}>

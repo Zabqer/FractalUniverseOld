@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 
 import "../../styles/Elements/Button.sass";
 import "../../styles/Elements/AsyncButton.sass";
@@ -12,7 +12,7 @@ export default class Checkbox extends Component {
   }
   render() {
     return (
-      <div className={`button-container ${this.props.className}`}>
+      <div className={`button-container ${this.props.className && this.props.className} ${this.props.withIcon && "withIcon"} ${this.props.disabled ? "disabled" : ""}`}>
         <button onClick={() => {
           if (this.state.isExecuting) return true;
           this.setState({ isExecuting: true });
@@ -27,7 +27,12 @@ export default class Checkbox extends Component {
               <span></span>
               <span></span>
             </div>
-          ) : this.props.children }
+          ) : (
+            <Fragment>
+              { this.props.children }
+              { this.props.withIcon && <this.props.withIcon/ > }
+            </Fragment>
+          ) }
         </button>
       </div>
     )
