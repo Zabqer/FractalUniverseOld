@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:8000/api";
+const apiUrl = `${window.location.origin}/api`;
 
 let cache = {
   users: {},

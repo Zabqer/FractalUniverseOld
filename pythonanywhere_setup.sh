@@ -21,7 +21,7 @@ make_virtual_env() {
 set_wsgi_config() {
   wsgi_file="/var/www/${USER,,}_pythonanywhere_com_wsgi.py"
   echo "Setting WSGI file. Location: $wsgi_file"
-  cat FractalUniverse/Backend/wsgi.py > $wsgi_file
+  cat FractalUniverse/Backend/FractalUniverse/wsgi.py > $wsgi_file
 }
 
 cd ~

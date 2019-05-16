@@ -7,7 +7,7 @@ import io
 credentials = service_account.Credentials.from_service_account_file(settings.GOOGLE_API_AUTH_FILE, scopes = [
     "https://www.googleapis.com/auth/drive"
 ])
-service = build("drive", "v3", credentials = credentials)
+service = build("drive", "v3", credentials=credentials, cache_discovery=False)
 
 def addFractalImage(fractal_id, image):
     with io.BytesIO() as fh:
