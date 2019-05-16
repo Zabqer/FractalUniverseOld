@@ -13,6 +13,7 @@ make_virtual_env() {
     python3 -m venv VirtualEnvironment
     source VirtualEnvironment/bin/activate
     pip install -r FractalUniverse/Backend/requirements.txt
+    python3 FractalUniverse/Backend/manage.py makemigrations
     python3 FractalUniverse/Backend/manage.py migrate
     deactivate
   fi
