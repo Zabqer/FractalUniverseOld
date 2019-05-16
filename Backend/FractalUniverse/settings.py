@@ -8,7 +8,7 @@ SECRET_KEY = "7aiuz#h#c$n*3adaaxk%lxw1t7o-onj!08g@-kb3!yrzm^8h&o"
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "zabqer.pythonanywhere.com"]
+ALLOWED_HOSTS = ["localhost", "192.168.1.100", "zabqer.pythonanywhere.com", "lproph.pythonanywhere.com"]
 
 AUTH_USER_MODEL = "FractalUniverse.User"
 
@@ -123,4 +123,4 @@ REMEBERED_TOKEN_LIFETIME = timedelta(weeks=1)
 
 GOOGLE_API_AUTH_FILE = os.path.join(BASE_DIR, "GoogleServiceAccount.json")
 
-CALCULATOR_THREAD_COUNT = 1
+PAGINATOR_PAGES = 10

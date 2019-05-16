@@ -1,5 +1,88 @@
+@import "../settings"
+
 .admin-page
 
 .edit-universe-popup
   .input-container
     width: calc(100% - 20px)
+
+.search
+  display: flex
+  flex-direction: row
+  form
+    flex: 1
+    display: flex
+    .input-container
+      flex: 1
+
+.results
+  padding: 10px
+  width: calc(100% - 10px)
+  display: grid
+  // grid-template-columns: auto 1fr 1fr auto
+  &.columns-2
+    grid-template-columns: auto 1fr
+  &.columns-3
+    grid-template-columns: auto 1fr 1fr
+  &.columns-4
+    grid-template-columns: auto 1fr 1fr auto
+  &.columns-5
+    grid-template-columns: auto 1fr 1fr 1fr auto
+  .row
+    cursor: pointer
+    display: contents
+    &.selected>div
+      color: white
+      background-color: $primary-color
+    &>div
+      display: flex
+      justify-content: center
+      align-items: center
+      padding: 5px 10px
+  .header
+    display: contents
+    &>div
+      display: flex
+      justify-content: center
+      align-items: center
+  .column-buttons
+    display: flex
+    button
+      padding: 5px
+
+
+.paginator
+  display: flex
+  flex-direction: column
+  &.loading
+    cursor: wait
+    pointer-events: none
+    opacity: .5
+
+.page-buttons
+  display: flex
+  flex-direction: row
+  background-color: #F6F6F6
+  .page-button
+    cursor: pointer
+    flex: 1
+    text-align: center
+    padding: 10px
+    transition: $default-transition
+    &.active
+      border-radius: 2px
+      cursor: default
+      color: white
+      background-color: $primary-color
+      box-shadow: $primary-box-shadow
+    &:not(.active):hover
+      background-color: #DDDDDD
+  .separator
+    cursor: default
+    padding: 5px
+    display: flex
+    justify-content: center
+    align-items: center
+
+.paginator
+  margin-bottom: 10px

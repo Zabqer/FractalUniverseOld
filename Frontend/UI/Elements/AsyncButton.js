@@ -13,7 +13,8 @@ export default class Checkbox extends Component {
   render() {
     return (
       <div className={`button-container ${this.props.className && this.props.className} ${this.props.withIcon && "withIcon"} ${this.props.disabled ? "disabled" : ""}`}>
-        <button onClick={() => {
+        <button onClick={(event) => {
+          event.stopPropagation();
           if (this.state.isExecuting) return true;
           this.setState({ isExecuting: true });
           this.props.onClick().then(() => {

@@ -1,0 +1,37 @@
+@import "../settings"
+
+.tabs-container
+  font-family: "Roboto", sans-serif
+  display: flex
+  flex-direction: row
+  .tabs
+    display: flex
+    flex-direction: column
+    .tab
+      border-radius: 2px
+      cursor: pointer
+      padding: 10px
+      // margin-bottom: 5px
+      transition: $default-transition
+      &:hover
+        background-color: #EEEEEE
+      &.active
+        color: white
+        background-color: $primary-color
+        box-shadow: $primary-box-shadow
+  .tab-content
+    flex: 1
+    margin-left: 10px
+
+.tab-change-enter
+  position: absolute
+  opacity: 0.01
+  &.tab-change-enter-active
+    opacity: 1
+    transition: opacity 300ms ease-in
+
+.tab-change-leave
+  opacity: 1
+  &.tab-change-leave-active
+    opacity: 0.01
+    transition: opacity 150ms ease-in

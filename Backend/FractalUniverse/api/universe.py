@@ -12,45 +12,77 @@ from ..models import Universe
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
+from django.core.paginator import Paginator, EmptyPage
 
 class PostSerializer(serializers.Serializer):
+    name = serializers.CharField(required=True)
     function = serializers.CharField(required=True)
-    # initial = serializers.CharField(required=True)
 
 class PutSerializer(serializers.Serializer):
     function = serializers.CharField(required=True)
 
+
+class SearchSerializer(serializers.Serializer):
+    keywords = serializers.CharField(allow_blank=True)
+    page = serializers.IntegerField(required=True, min_value = 1)
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def search(request):
+    serializer = SearchSerializer(data = request.data)
+    serializer.is_valid(raise_exception=True)
+    keywords = serializer.data["keywords"]
+    if len(keywords) == 0:
+        universes = Universe.objects.all().order_by("-id")
+    else:
+        universes = Universe.objects.filter(name__icontains = keywords).order_by("-id");
+    paginator = Paginator(universes, 5)
+    try:
+        page = paginator.page(serializer.data["page"])
+    except EmptyPage:
+        return Response({
+            "detail": _("Page not found.")
+        }, status = HTTP_404_NOT_FOUND)
+    response = []
+    for universe in page.object_list:
+        response.append({
+            "id": universe.id,
+            "name": universe.name,
+            "function": universe.function
+        })
+    return Response({
+        "maxPages": paginator.num_pages,
+        "universes": response
+    }, status = HTTP_200_OK)
+
+
 # TODO: add admin permissions
 @csrf_exempt
-@api_view(["GET", "POST", "PUT", "DELETE"])
+@api_view(["POST", "PUT", "DELETE"])
 @permission_classes((IsAuthenticated,))
 def universes(request, universe = None):
-    if request.method == "GET":
-        response = []
-        universes = Universe.objects.all()
-        for universe in universes:
-            response.append({
-                "id": universe.id,
-                "function": universe.function
-            })
-        return Response(response, status = HTTP_200_OK)
-    elif request.method == "POST":
+    if request.method == "POST":
         if not universe is None:
             raise MethodNotAllowed("POST")
         serializer = PostSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         function = serializer.data["function"]
-        # initial = serializer.data["initial"]
+        name = serializer.data["name"]
         initial = "x+y*1j"
-        if Universe.objects.filter(function = function, initial_value = initial).exists():
+        if Universe.objects.filter(function = function, name = name, initial_value = initial).exists():
             return Response({
                 "function": _("Universe arleady exists.")
             }, status = HTTP_400_BAD_REQUEST)
-        universe = Universe.objects.create(function = function, initial_value = initial)
+        universe = Universe.objects.create(function = function, name= name, initial_value = initial)
         universe.save()
         return Response({
             "success": True,
-            "id": universe.id
+            "universe": {
+                "id": universe.id,
+                "name": universe.name,
+                "function": universe.function
+            }
         }, status = HTTP_200_OK)
     elif request.method == "PUT":
         serializer = PutSerializer(data = request.data)

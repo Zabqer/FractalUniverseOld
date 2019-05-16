@@ -13,9 +13,46 @@ from rest_framework import serializers
 from ..fractal_utils import task_manager
 from .. import utils
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator, EmptyPage
 
 class PostSerializer(serializers.Serializer):
     parameter = serializers.FloatField(required=True)
+
+class SearchSerializer(serializers.Serializer):
+    keywords = serializers.CharField(allow_blank=True)
+    page = serializers.IntegerField(required=True, min_value = 1)
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def search(request, universe):
+    try:
+        universe = Universe.objects.get(id = universe)
+    except ObjectDoesNotExist:
+        return Response({
+            "detail": _("Universe not found.")
+        }, status = HTTP_404_NOT_FOUND)
+    serializer = SearchSerializer(data = request.data)
+    serializer.is_valid(raise_exception=True)
+    keywords = serializer.data["keywords"]
+    if len(keywords) == 0:
+        dimensions = Dimension.objects.filter(universe = universe).order_by("-id")
+    else:
+        dimensions = Dimension.objects.filter(universe = universe, name__icontains = keywords).order_by("-id");
+    paginator = Paginator(dimensions, 5)
+    try:
+        page = paginator.page(serializer.data["page"])
+    except EmptyPage:
+        return Response({
+            "detail": _("Page not found.")
+        }, status = HTTP_404_NOT_FOUND)
+    response = []
+    for dimension in page.object_list:
+        response.append(utils.dimension_info(dimension))
+    return Response({
+        "maxPages": paginator.num_pages,
+        "dimensions": response
+    }, status = HTTP_200_OK)
 
 # TODO: add admin permissions
 @csrf_exempt
@@ -32,12 +69,7 @@ def dimensions(request, universe = None, dimension = None):
         response = []
         dimensions = Dimension.objects.filter(universe = universe)
         for dimension in dimensions:
-            response.append({
-                "id": dimension.id,
-                "universe": dimension.universe.id,
-                "parameter": dimension.parameter,
-                "map": utils.fractal_info(dimension.map)
-            })
+            response.append(utils.dimension_info(dimension))
         return Response(response, status = HTTP_200_OK)
     elif request.method == "POST":
         try:
@@ -73,9 +105,7 @@ def dimensions(request, universe = None, dimension = None):
         task_manager.calculate(dimension.map.default_drawable)
         return Response({
             "success": True,
-            "id": dimension.id,
-            "parameter": dimension.parameter,
-            "map": utils.fractal_info(dimension.map)
+            "dimension": utils.dimension_info(dimension)
         }, status = HTTP_200_OK)
     elif request.method == "PUT":
         serializer = PostSerializer(data = request.data)

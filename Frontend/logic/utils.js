@@ -7,6 +7,27 @@ export function decimal2hex(d, padding) {
     return hex.toUpperCase();
 }
 
+function generateGradation(from, to, steps) {
+  let colors = []
+  let alpha = 0;
+  for (let j = 0; j < steps; j++) {
+    let color = Math.floor(((from & 0xFF) * alpha + (1 - alpha) * (to & 0xFF)) + ((((from >> 8) & 0xFF) * alpha + (1 - alpha) * ((to >> 8) & 0xFF)) << 8) + ((((from >> 16) & 0xFF) * alpha + (1 - alpha) * ((to >> 16) & 0xFF)) << 16));
+    colors.push(color)
+      alpha += 1.0 / steps;
+  }
+  return colors;
+}
+
+export function generatePalette(colors, steps) {
+  let gradations = []
+  for (let i = 0; i < colors.length - 1; i++) {
+    console.log(colors[i])
+    gradations = gradations.concat(generateGradation(colors[i + 1], colors[i], steps));
+  }
+  gradations.push(colors[colors.length - 1]);
+  return gradations;
+}
+
 export function rgb2hsv(color) {
   let r = ((color >> 16) & 0xFF) / 255;
   let g = ((color >> 8) & 0xFF) / 255;

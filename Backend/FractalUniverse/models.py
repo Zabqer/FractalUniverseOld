@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 import binascii
 import os
 import hashlib
-from .fractal_utils import task_manager
 
 from .managers import UserManager
 
@@ -71,6 +70,7 @@ class Palette(models.Model):
 class Universe(models.Model): # Вселенная
     function = models.TextField(max_length=200) # Формула для просчёта
     initial_value = models.TextField(max_length=40) # Начальное значение для точки x+1j*y
+    name = models.TextField()
 
 class Dimension(models.Model): # Измерение
     universe = models.ForeignKey(
@@ -80,9 +80,10 @@ class Dimension(models.Model): # Измерение
     map = models.ForeignKey(
         "Fractal", related_name="dimensions",
         on_delete=models.CASCADE, verbose_name="fractal",
-        null=True
+        null=True, blank=True
     ) # Измерение
     parameter = models.FloatField() # Параметр (переделал из строки под число)
+    name = models.TextField()
     class Meta():
         verbose_name = "dimension"
         verbose_name_plural = "dimensions"
@@ -131,9 +132,14 @@ class Drawable(models.Model):
         verbose_name_plural = "drawables"
 
 
-class FractalCalculateTask(models.Model):
-    fractal = models.ForeignKey(
-        "Fractal", related_name="fractalcalculatetasks",
-        on_delete=models.CASCADE, verbose_name="fractal"
+class DrawableCalculateTask(models.Model):
+    drawable = models.ForeignKey(
+        "Drawable", related_name="drawablecalculatetasks",
+        on_delete=models.CASCADE, verbose_name="drawable"
     )
-    startTime = models.DateTimeField("startTime", auto_now_add=True)
+    addTime = models.DateTimeField("addTime", auto_now_add=True)
+    startTime = models.DateTimeField("startTime", null=True)
+    endTime = models.DateTimeField("endTime", null=True)
+    class Meta:
+        verbose_name = "drawablecalculatetask"
+        verbose_name_plural = "drawablecalculatetasks"

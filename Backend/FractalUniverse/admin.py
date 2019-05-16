@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Token, User, Palette, Fractal, Dimension, Universe, Drawable
+from .models import Token, User, Palette, Fractal, Dimension, Universe, Drawable, DrawableCalculateTask
 from django.contrib.auth.admin import UserAdmin
 
 class UserAdmin(admin.ModelAdmin):
@@ -18,11 +18,15 @@ class DimensionAdmin(admin.ModelAdmin):
     list_display = ("id", "universe", "parameter", "map")
 
 class UniverseAdmin(admin.ModelAdmin):
-    list_display = ("id", "function", "initial_value")
+    list_display = ("id", "name", "function", "initial_value")
 
 
 class DrawableAdmin(admin.ModelAdmin):
     list_display = ("id", "fractal", "palette", "state", "created", "image_url", "file_id")
+
+
+class DrawableCalculateTaskAdmin(admin.ModelAdmin):
+    list_display = ("drawable", "addTime", "startTime")
 
 
 admin.site.register(User, UserAdmin)
@@ -32,3 +36,4 @@ admin.site.register(Fractal, FractalAdmin)
 admin.site.register(Dimension, DimensionAdmin)
 admin.site.register(Universe, UniverseAdmin)
 admin.site.register(Drawable, DrawableAdmin)
+admin.site.register(DrawableCalculateTask, DrawableCalculateTaskAdmin)
