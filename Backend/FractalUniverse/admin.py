@@ -1,21 +1,30 @@
 from django.contrib import admin
-from .models import Token, User, Palette, Fractal, Dimension, Universe, Drawable, DrawableCalculateTask
+from .models import AuthToken, User, Palette, Fractal, Dimension, Universe, Drawable, DrawableCalculateTask, EmailVerificationToken
 from django.contrib.auth.admin import UserAdmin
+
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ("id", "login", "email", "date_joined")
 
-class TokenAdmin(admin.ModelAdmin):
+
+class AuthTokenAdmin(admin.ModelAdmin):
     list_display = ("key", "user", "created", "remember", "expire_at")
+
+class EmailVerificationTokenAdmin(admin.ModelAdmin):
+    list_display = ("key", "user")
+
 
 class PaleteAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "name", "colors", "gradations")
 
+
 class FractalAdmin(admin.ModelAdmin):
     list_display = ("id", "dimension", "x", "y", "default_drawable")
 
+
 class DimensionAdmin(admin.ModelAdmin):
     list_display = ("id", "universe", "parameter", "map")
+
 
 class UniverseAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "function", "initial_value")
@@ -30,7 +39,8 @@ class DrawableCalculateTaskAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, UserAdmin)
-admin.site.register(Token, TokenAdmin)
+admin.site.register(AuthToken, AuthTokenAdmin)
+admin.site.register(EmailVerificationToken, EmailVerificationTokenAdmin)
 admin.site.register(Palette, PaleteAdmin)
 admin.site.register(Fractal, FractalAdmin)
 admin.site.register(Dimension, DimensionAdmin)

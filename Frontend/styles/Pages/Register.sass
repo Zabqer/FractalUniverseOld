@@ -1,0 +1,28 @@
+@import "../settings"
+
+.register-page
+  display: flex
+  flex-direction: column
+  justify-content: center
+  align-items: center
+  .column
+    span
+      max-width: 400px
+      width: 100%
+      .input-container
+        width: calc(100% - 40px)
+      .button-container
+        margin: 10px
+      .google-captcha
+        position: absolute
+        top: 0
+        left: 0
+        width: 100%
+        height: 100%
+        display: flex
+        justify-content: center
+        align-items: center
+        border-radius: 6px
+        background-color: rgba(255, 255, 255, .8)
+        .g-recaptcha
+          margin: 20px

@@ -1,0 +1,39 @@
+@import "settings"
+
+header
+  position: absolute
+  display: flex
+  justify-content: space-between
+  top: 260px
+  z-index: 2
+  width: 100%
+  height: 50px
+  box-sizing: border-box
+  background-color: $primary-color
+  font-family: "Roboto", sans-serif
+  color: white
+  box-shadow: $primary-box-shadow
+  &.fixed
+    position: fixed
+    top: 0
+  nav
+    display: flex
+    flex-direction: row
+    padding: 10px
+    a
+      padding: 6px
+      border-radius: 2px
+      color: white
+      text-decoration: none
+      transition: $default-transition
+      &.active
+        font-weight: 500
+      &:hover
+        background: rgba(255, 255, 255, .2)
+      &:not(:first-child)
+        margin-left: 10px
+  .user-buttons
+    display: flex
+    flex-direction: row
+    button
+      padding: 6px

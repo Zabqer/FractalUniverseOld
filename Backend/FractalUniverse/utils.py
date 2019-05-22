@@ -2,7 +2,7 @@
 import hashlib
 import ast
 from django.conf import settings
-from .models import Fractal, Drawable
+from .models import Fractal, Drawable, EmailVerificationToken
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_404_NOT_FOUND,
@@ -13,6 +13,17 @@ from rest_framework.status import (
 from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
 from django.core.paginator import Paginator, EmptyPage
+from django.core.mail import send_mail
+
+
+def send_verification_email(user, token):
+    mail = "{}, {} https://lprohl.pythonanywhere.com/activate/{}/{}".format(
+        user.login,
+        _("to complete registaration click link:"),
+        user.id,
+        token.key
+    )
+    send_mail("FractalUniverse account activation", mail, settings.EMAIL_HOST_USER, [user.email], fail_silently=False)
 
 
 class SearchSerializer(serializers.Serializer):
@@ -52,7 +63,8 @@ def user_info(user, full=False):
         "email": full and user.email,
         "avatar": "https://www.gravatar.com/avatar/{}?s=128".format(hashlib.md5(user.email.lower().encode("utf-8")).hexdigest()),
         "isAdmin": user.is_staff,
-        "isPremium": user.is_premium
+        "isPremium": user.is_premium,
+        "verified": user.is_active
     }
 
 

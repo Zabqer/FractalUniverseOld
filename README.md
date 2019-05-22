@@ -1,6 +1,5 @@
 FractalUniverse
 
 TODO
-Crontab
-Admin panel
-Config
+- Config
+- Admin sessions

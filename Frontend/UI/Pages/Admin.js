@@ -13,6 +13,9 @@ import openDimensionMap from "../Elements/DimensionMap";
 
 import EditPalettePopup from "../Popups/EditPalettePopup";
 
+
+import PermissionRequired from "../PermissionRequired";
+
 //
 // import AsyncContentProvider from "../AsyncContentProvider";
 //
@@ -22,9 +25,11 @@ import SaveIcon from "../Icons/Save";
 import EditIcon from "../Icons/Edt";
 import DeleteIcon from "../Icons/Delete";
 
-class AddUniversePopup extends Component {
+class AddUniversePopup extends PermissionRequired {
   constructor(props) {
-    super(props);
+    super(props, {
+      isAdmin: true
+    });
     this.state = {
       name: "",
       nameError: null,
@@ -32,7 +37,7 @@ class AddUniversePopup extends Component {
       functionError: null
     }
   }
-  render() {
+  renderWithPermissions() {
     return (
       <div className="edit-universe-popup popup">
         <div className="header">
@@ -107,6 +112,75 @@ class AddDimensionPopup extends Component {
             <Button onClick={() => window.hidePopup()}> { gettext("Cancel") } </Button>
           </div>
         </div>
+      </div>
+    )
+  }
+}
+
+class UsersTab extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedUser: null
+    }
+  }
+  render() {
+    return (
+      <div className="users-tab">
+        <Paginator searchText={ gettext("Name") } onSearch={async (keywords, page) => {
+          let result = await window.FU.searchUsers(keywords, page);
+          return {
+            rows: result.users,
+            maxPages: result.maxPages
+          }
+        }} header={(search) => {
+          return (
+            <Fragment>
+              <div className="column-id">
+                { gettext("ID") }
+              </div>
+              <div className="column-login">
+                { gettext("Login") }
+              </div>
+              <div className="column-email">
+                { gettext("Email") }
+              </div>
+              <div className="column-verified">
+                { gettext("Verified") }
+              </div>
+              <div className="column-buttons">
+              </div>
+            </Fragment>
+          )
+        }} columns={5} row={(user, search) => {
+          return (
+            <Fragment>
+              <div className="column-id">
+                { user.id }
+              </div>
+              <div className="column-login">
+                { user.login }
+              </div>
+              <div className="column-email">
+                { user.email }
+              </div>
+              <div className="column-verified">
+                { user.verified ? gettext("Yes") : gettext("No") }
+              </div>
+              <div className="column-buttons">
+                <Button withIcon={DeleteIcon} onClick={async () => {
+                    await window.FU.deleteUser(user.id);
+                    search();
+                }}> </Button>
+              </div>
+            </Fragment>
+          )
+        }} onSelect={(user) => {
+          this.setState({ selectedUser: user });
+        }} />
+        { this.state.selectedUser && (
+          <div> { this.state.selectedUser.id } </div>
+        ) }
       </div>
     )
   }
@@ -299,51 +373,7 @@ export default class Admin extends Component {
             }} />
           </Tab>
           <Tab title={ gettext("Users") }>
-            <Paginator searchText={ gettext("Name") } onSearch={async (keywords, page) => {
-              let result = await window.FU.searchUsers(keywords, page);
-              return {
-                rows: result.users,
-                maxPages: result.maxPages
-              }
-            }} header={(search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { gettext("ID") }
-                  </div>
-                  <div className="column-login">
-                    { gettext("Login") }
-                  </div>
-                  <div className="column-email">
-                    { gettext("Email") }
-                  </div>
-                  <div className="column-buttons">
-                  </div>
-                </Fragment>
-              )
-            }} columns={4} row={(user, search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { user.id }
-                  </div>
-                  <div className="column-login">
-                    { user.login }
-                  </div>
-                  <div className="column-email">
-                    { user.email }
-                  </div>
-                  <div className="column-buttons">
-                    <Button withIcon={DeleteIcon} onClick={async () => {
-                        await window.FU.deleteUser(user.id);
-                        search();
-                    }}> </Button>
-                  </div>
-                </Fragment>
-              )
-            }} onSelect={(user) => {
-              this.setState({ selectedUser: user });
-            }} />
+            <UsersTab />
           </Tab>
           <Tab title={ gettext("Tasks") }>
             <Paginator searchText={ gettext("ID") } onSearch={async (keywords, page) => {

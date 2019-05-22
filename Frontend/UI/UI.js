@@ -5,11 +5,12 @@ import ReactCSSTransitionGroup from "react-addons-css-transition-group";
 import Header from "./Header";
 
 import Parallax from "./Elements/Parallax";
-import LoggedInRequired from "./LoggedInRequired";
 
 import Images from "./Pages/Images";
+import Register from "./Pages/Register";
 import Profile from "./Pages/Profile";
 import Admin from "./Pages/Admin";
+import ActivateEmail from "./Pages/ActivateEmail";
 import NotFound from "./Pages/NotFound";
 
 export default class UI extends Component {
@@ -68,10 +69,14 @@ export default class UI extends Component {
           <ReactCSSTransitionGroup transitionName="page-change" transitionEnterTimeout={300} transitionLeaveTimeout={150}>
             <Switch>
               <Route exact path="/" component={Images} />
-              <Route path="/profile" component={Profile} />
-              <LoggedInRequired isAdmin={true}>
+              {/*<LoggedInRequired isLogin={false}>*/}
+                <Route path="/register" component={Register} />
+              {/*</LoggedInRequired>*/}
+              {/*<LoggedInRequired isLogin={true}>*/}
+                <Route path="/profile" component={Profile} />
+              {/*</LoggedInRequired>*/}
                 <Route path="/admin" component={Admin} />
-              </LoggedInRequired>
+              <Route path="/activate/:user(\d+)/:hash(.+)" component={ActivateEmail} />
               <Route component={NotFound} />
             </Switch>
           </ReactCSSTransitionGroup>

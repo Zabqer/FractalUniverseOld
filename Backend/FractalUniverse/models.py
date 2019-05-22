@@ -26,11 +26,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["email", "password"]
     class Meta:
         managed=True
-        verbose_name = "user"
-        verbose_name_plural = "users"
 
 
-class Token(models.Model):
+class AuthToken(models.Model):
     key = models.CharField("key", max_length=40, primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="auth_tokens",
@@ -51,13 +49,29 @@ class Token(models.Model):
             self.expire_at = timezone.now() + settings.REMEBERED_TOKEN_LIFETIME
         else:
             self.expire_at = timezone.now() + settings.TOKEN_LIFETIME
-        return super(Token, self).save(*args, **kwargs)
+        return super(AuthToken, self).save(*args, **kwargs)
 
     def generate_key(self):
         return binascii.hexlify(os.urandom(32)).decode()
 
     def __str__(self):
         return self.key
+
+
+class EmailVerificationToken(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="email_virification_tokens",
+        on_delete=models.CASCADE, verbose_name="user"
+    )
+    key = models.CharField("key", max_length=40, primary_key=True)
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = self.generate_key()
+        return super(EmailVerificationToken, self).save(*args, **kwargs)
+
+    def generate_key(self):
+        return binascii.hexlify(os.urandom(32)).decode()
 
 
 class Palette(models.Model):
@@ -71,8 +85,6 @@ class Palette(models.Model):
     gradations = models.IntegerField("gradations")
 
     class Meta:
-        verbose_name = "palette"
-        verbose_name_plural = "palettes"
         unique_together = ("id", "user")
 
 
@@ -95,10 +107,6 @@ class Dimension(models.Model):  # Измерение
     parameter = models.FloatField()  # Параметр (переделал из строки под число)
     name = models.TextField()
 
-    class Meta():
-        verbose_name = "dimension"
-        verbose_name_plural = "dimensions"
-
 
 class Fractal(models.Model):
     dimension = models.ForeignKey(
@@ -112,10 +120,6 @@ class Fractal(models.Model):
         on_delete=models.CASCADE, verbose_name="drawable",
         null=True
     )  # Дефолтный Drawable
-
-    class Meta:
-        verbose_name = "fractal"
-        verbose_name_plural = "fractals"
 
 
 class Drawable(models.Model):
@@ -142,10 +146,6 @@ class Drawable(models.Model):
     file_id = models.TextField(max_length=40, null=True)
     image_url = models.URLField(null=True)
 
-    class Meta:
-        verbose_name = "drawable"
-        verbose_name_plural = "drawables"
-
 
 class DrawableCalculateTask(models.Model):
     drawable = models.ForeignKey(
@@ -155,7 +155,3 @@ class DrawableCalculateTask(models.Model):
     addTime = models.DateTimeField("addTime", auto_now_add=True)
     startTime = models.DateTimeField("startTime", null=True)
     endTime = models.DateTimeField("endTime", null=True)
-
-    class Meta:
-        verbose_name = "drawablecalculatetask"
-        verbose_name_plural = "drawablecalculatetasks"

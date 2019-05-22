@@ -2,14 +2,14 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from datetime import timedelta
 from django.utils import timezone
-from .models import Token
+from .models import AuthToken
 
 class ExpirableTokenAuthentication(TokenAuthentication):
-    model = Token
+    model = AuthToken
     def authenticate_credentials(self, key):
         try:
-            token = Token.objects.get(key = key)
-        except Token.DoesNotExist:
+            token = AuthToken.objects.get(key = key)
+        except AuthToken.DoesNotExist:
             raise AuthenticationFailed("Invalid Token")
         if token.expire_at <= timezone.now():
             token.delete()

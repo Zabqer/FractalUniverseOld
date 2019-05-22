@@ -58,6 +58,9 @@ export default {
     this.init = null;
     this.token = localStorage.getItem("token");
     this.expireAt = localStorage.getItem("expire_at");
+    if (!this.expireAt) {
+      return;
+    }
     // Проверяем не истёк ли токен
     if (new Date(this.expireAt) <= new Date()) {
       console.warn("[FractalUniverse] token has expired")
@@ -66,6 +69,7 @@ export default {
       this.loggedAs = null;
       localStorage.removeItem("token");
       localStorage.removeItem("expire_at");
+      return;
     }
     // Получаем информацию о пользователе
     if (this.token) {
@@ -99,6 +103,38 @@ export default {
       console.log("[FractalUniverse] logged as", this.loggedAs);
       localStorage.setItem("token", this.token);
       return true;
+    }
+    return data;
+  },
+  async register(login, email, password, captcha) {
+    console.log("[FractalUniverse] register", arguments);
+    if (this.loggedAs) {
+      console.error("[FractalUniverse] arleady logged in");
+      return false;
+    }
+    let data = await this.api("auth/register", "POST", {
+      login,
+      email,
+      password,
+      captcha
+    });
+    return data;
+  },
+  async activateEmail(user, hash) {
+    console.log("[FractalUniverse] activateEmail", arguments);
+    if (this.loggedAs) {
+      console.error("[FractalUniverse] arleady logged in");
+      return false;
+    }
+    let data = await this.api("auth/activate", "POST", {
+      user,
+      hash
+    });
+    if (data.token) {
+      this.token = data.token;
+      this.loggedAs = data.user;
+      console.log("[FractalUniverse] logged as", this.loggedAs);
+      localStorage.setItem("token", this.token);
     }
     return data;
   },

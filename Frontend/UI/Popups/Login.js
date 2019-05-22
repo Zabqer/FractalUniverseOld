@@ -21,8 +21,8 @@ export default class LoginPopup extends Component {
     this.state = {
       stage: "form",
       login: "",
-      password: "",
       loginError: null,
+      password: "",
       passwordError: null,
       rememberMe: false
     }

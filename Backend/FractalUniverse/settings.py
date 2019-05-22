@@ -8,7 +8,7 @@ SECRET_KEY = "7aiuz#h#c$n*3adaaxk%lxw1t7o-onj!08g@-kb3!yrzm^8h&o"
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "192.168.1.100", "zabqer.pythonanywhere.com", "lproph.pythonanywhere.com"]
+ALLOWED_HOSTS = ["localhost", "192.168.1.100", "zabqer.pythonanywhere.com", "lprohl.pythonanywhere.com"]
 
 AUTH_USER_MODEL = "FractalUniverse.User"
 
@@ -124,3 +124,10 @@ REMEBERED_TOKEN_LIFETIME = timedelta(weeks=1)
 GOOGLE_API_AUTH_FILE = os.path.join(BASE_DIR, "GoogleServiceAccount.json")
 
 PAGINATOR_PAGES = 10
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "fract.universe@gmail.com"
+EMAIL_HOST_PASSWORD = "********"

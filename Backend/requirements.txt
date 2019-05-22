@@ -1,4 +1,5 @@
 djangorestframework
 django
 google-api-python-client
+oauth2client
 pillow

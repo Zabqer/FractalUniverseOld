@@ -18,6 +18,7 @@ urlpatterns = [
 # !!
     path("fake_admin/", admin.site.urls),
     path("api/auth/register", auth.register),
+    path("api/auth/activate", auth.activate),
     path("api/auth/login", auth.login),
     path("api/auth/logout", auth.logout),
     path("api/users", user.users),

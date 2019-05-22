@@ -1,10 +1,12 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { Route, Link } from "react-router-dom";
 
 import Button from "./Elements/Button";
 import AsyncButton from "./Elements/AsyncButton";
 
 import LoginPopup from "./Popups/Login";
+
+import "../styles/Header.sass";
 
 export default class Header extends Component {
   constructor(props) {
@@ -35,29 +37,33 @@ export default class Header extends Component {
     return (
       <header className={`header${this.state.fixed ? " fixed" : ""}`} ref={this.header}>
         <nav>
-          <Link to="/" className="active">
+          <Link to="/">
             { gettext("Main") }
           </Link>
           <Link to="/admin">
-            Admin
+            { gettext("Admin") }
           </Link>
-        </nav>
-        { window.FU.loggedAs ? (
-          <div style={{display: "flex"}}>
-            Logged as { window.FU.loggedAs.login }
-            <Link to="/profile">
-              Profile
-            </Link>
-            <AsyncButton className="login-button" onClick={() => window.FU.logout()}>
-              { gettext("Logout") }
-            </AsyncButton>
+          <div className="user-buttons">
+            { window.FU.loggedAs ? (
+              <Fragment>
+                <AsyncButton onClick={() => window.FU.logout()}>
+                  { gettext("Logout") }
+                </AsyncButton>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <Link to="/register">
+                  { gettext("Register") }
+                </Link>
+                <Button onClick={() => {
+                  window.showPopup(<LoginPopup />);
+                }}>
+                  { gettext("Login") }
+                </Button>
+              </Fragment>
+            ) }
           </div>
-        ) : (
-          <Button className="login-button" onClick={() => {
-            window.showPopup(<LoginPopup />);
-          }}>
-            { gettext("Login") }
-          </Button>) }
+        </nav>
       </header>
     );
   }
