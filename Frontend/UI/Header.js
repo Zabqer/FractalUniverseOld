@@ -46,6 +46,9 @@ export default class Header extends Component {
           <div className="user-buttons">
             { window.FU.loggedAs ? (
               <Fragment>
+                <Link to="/profile">
+                  { window.FU.loggedAs.login }
+                </Link>
                 <AsyncButton onClick={() => window.FU.logout()}>
                   { gettext("Logout") }
                 </AsyncButton>

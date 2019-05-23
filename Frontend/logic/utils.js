@@ -21,7 +21,6 @@ function generateGradation(from, to, steps) {
 export function generatePalette(colors, steps) {
   let gradations = []
   for (let i = 0; i < colors.length - 1; i++) {
-    console.log(colors[i])
     gradations = gradations.concat(generateGradation(colors[i + 1], colors[i], steps));
   }
   gradations.push(colors[colors.length - 1]);

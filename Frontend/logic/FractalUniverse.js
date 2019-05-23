@@ -236,12 +236,13 @@ export default {
   },
   // DIMENSION
   // PALETTE
-  async addPalette(name, colors, gradations) {
+  async addPalette(name, colors, gradations, global) {
     console.log("[FractalUniverse] addPalette", arguments);
     return await this.api("palettes", "POST", {
       name,
       colors,
-      gradations
+      gradations,
+      global
     });
   },
   async searchPalettes(keywords, page) {

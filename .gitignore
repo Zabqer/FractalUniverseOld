@@ -1,4 +1,6 @@
 Frontend/node_modules/
 Backend/db.sqlite3
+Backend/FractalUniverse/secretconfig.py
+Backend/GoogleServiceAccount.json
 __pycache__/
 *.py[cod]

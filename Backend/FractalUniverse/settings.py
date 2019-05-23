@@ -1,10 +1,19 @@
 import os
 from datetime import timedelta
 from django.utils.translation import ugettext_lazy as _
+from . import secretconfig
+
+# Secretconfig
+
+import sys
+
+self = sys.modules[__name__]
+for name, value in secretconfig.__dict__.items():
+    setattr(self, name, value)
+
+# Other
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-SECRET_KEY = "7aiuz#h#c$n*3adaaxk%lxw1t7o-onj!08g@-kb3!yrzm^8h&o"
 
 DEBUG = True
 
@@ -116,8 +125,6 @@ else:
 
 # FractalUniverse
 
-GRECAPTCHA_PRIVATE_KEY = "6Ld_dZYUAAAAAFNGKcVLH0nA3OwcJf0BVZD-2H8r"
-
 TOKEN_LIFETIME = timedelta(hours=1)
 REMEBERED_TOKEN_LIFETIME = timedelta(weeks=1)
 
@@ -129,5 +136,3 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = "fract.universe@gmail.com"
-EMAIL_HOST_PASSWORD = "********"

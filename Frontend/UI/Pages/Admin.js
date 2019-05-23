@@ -25,11 +25,9 @@ import SaveIcon from "../Icons/Save";
 import EditIcon from "../Icons/Edt";
 import DeleteIcon from "../Icons/Delete";
 
-class AddUniversePopup extends PermissionRequired {
+class AddUniversePopup extends Component {
   constructor(props) {
-    super(props, {
-      isAdmin: true
-    });
+    super(props);
     this.state = {
       name: "",
       nameError: null,
@@ -37,7 +35,7 @@ class AddUniversePopup extends PermissionRequired {
       functionError: null
     }
   }
-  renderWithPermissions() {
+  render() {
     return (
       <div className="edit-universe-popup popup">
         <div className="header">
@@ -117,6 +115,202 @@ class AddDimensionPopup extends Component {
   }
 }
 
+class UniversesTab extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedUniverse: null,
+      selectedDimension: null
+    }
+  }
+  render() {
+    return (
+      <Fragment>
+        <h2> { gettext("Universes") } </h2>
+        <Paginator searchText={ gettext("Name or function") } onSearch={async (keywords, page) => {
+          let result = await window.FU.searchUniverses(keywords, page);
+          return {
+            rows: result.universes,
+            maxPages: result.maxPages
+          }
+        }} header={(search) => {
+          return (
+            <Fragment>
+              <div className="column-id">
+                { gettext("ID") }
+              </div>
+              <div className="column-name">
+                { gettext("Name") }
+              </div>
+              <div className="column-function">
+                { gettext("Function") }
+              </div>
+              <div className="column-buttons">
+                <Button withIcon={AddIcon} onClick={() => {
+                  window.showPopup(<AddUniversePopup onSave={() => {
+                    search(1);
+                  }} />)
+                }}> </Button>
+              </div>
+            </Fragment>
+          )
+        }} columns={4} row={(universe, search) => {
+          return (
+            <Fragment>
+              <div className="column-id">
+                { universe.id }
+              </div>
+              <div className="column-name">
+                { universe.name }
+              </div>
+              <div className="column-function">
+                { universe.function }
+              </div>
+              <div className="column-buttons">
+                <Button withIcon={DeleteIcon} onClick={async () => {
+                    await window.FU.deleteUniverse(universe.id);
+                    search();
+                }}> </Button>
+              </div>
+            </Fragment>
+          )
+        }} onSelect={(universe) => {
+          this.setState({ selectedUniverse: universe, selectedDimension: null });
+        }} />
+        { this.state.selectedUniverse ? (
+          <Fragment>
+            <h2> { gettext("Dimensions") } </h2>
+            <Paginator index={this.state.selectedUniverse.id} searchText={ gettext("Name or parameter") } onSearch={async (keywords, page) => {
+              let result = await window.FU.searchDimensions(this.state.selectedUniverse.id, keywords, page);
+              return {
+                rows: result.dimensions,
+                maxPages: result.maxPages
+              }
+            }} header={(search) => {
+              return (
+                <Fragment>
+                  <div className="column-id">
+                    { gettext("ID") }
+                  </div>
+                  <div className="column-name">
+                    { gettext("Name") }
+                  </div>
+                  <div className="column-parameter">
+                    { gettext("Parameter") }
+                  </div>
+                  <div className="column-buttons">
+                    <Button withIcon={AddIcon} onClick={() => {
+                      window.showPopup(<AddDimensionPopup universe={this.state.selectedUniverse.id} onSave={() => {
+                        search(1);
+                      }} />)
+                    }}> </Button>
+                  </div>
+                </Fragment>
+              )
+            }} columns={4} row={(dimension, search) => {
+              return (
+                <Fragment>
+                  <div className="column-id">
+                    { dimension.id }
+                  </div>
+                  <div className="column-name">
+                    { dimension.name }
+                  </div>
+                  <div className="column-parameter">
+                    { dimension.parameter }
+                  </div>
+                  <div className="column-buttons">
+                    <Button withIcon={DeleteIcon} onClick={async () => {
+                        await window.FU.deleteDimension(dimension.id);
+                        search();
+                    }}> </Button>
+                  </div>
+                </Fragment>
+              )
+            }} onSelect={(dimension) => {
+              this.setState({ selectedDimension: dimension });
+            }} />
+          </Fragment>
+        ) : null }
+        { this.state.selectedDimension ? (
+          <Button onClick={() => {
+            openDimensionMap(this.state.selectedDimension);
+          }}> { gettext("Open map") } </Button>
+        ) : null }
+      </Fragment>
+    )
+  }
+}
+
+class PalettesTab extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedPalette: null
+    }
+  }
+  render() {
+    return (
+      <Paginator searchText={ gettext("ID or name") } onSearch={async (keywords, page) => {
+        let result = await window.FU.searchPalettes(keywords, page);
+        return {
+          rows: result.palettes,
+          maxPages: result.maxPages
+        }
+      }} header={(search) => {
+        return (
+          <Fragment>
+            <div className="column-id">
+              { gettext("ID") }
+            </div>
+            <div className="column-name">
+              { gettext("Name") }
+            </div>
+            <div className="column-palette">
+              { gettext("Palette") }
+            </div>
+            <div className="column-user">
+              { gettext("User") }
+            </div>
+            <div className="column-buttons">
+              <Button withIcon={AddIcon} onClick={() => {
+                window.showPopup(<EditPalettePopup onSave={() => {
+                  search(1);
+                }} global={true} />)
+              }}> </Button>
+            </div>
+          </Fragment>
+        )
+      }} columns={5} row={(palette, search) => {
+        return (
+          <Fragment>
+            <div className="column-id">
+              { palette.id }
+            </div>
+            <div className="column-name">
+              { palette.name }
+            </div>
+            <div className="column-palette">
+              <Palette colors={palette.colors} gradations={palette.gradations} />
+            </div>
+            <div className="column-user">
+              { palette.user || "-" }
+            </div>
+            <div className="buttons">
+              <Button withIcon={DeleteIcon} onClick={async () => {
+                  await window.FU.deletePalette(palette.id);
+                  search();
+              }}> </Button>
+            </div>
+          </Fragment>
+        )
+      }} onSelect={(palette) => {
+        this.setState({ selectedPalette: palette });
+      }} />
+    )
+  }
+}
+
 class UsersTab extends Component {
   constructor(props) {
     super(props);
@@ -186,232 +380,70 @@ class UsersTab extends Component {
   }
 }
 
-export default class Admin extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedUniverse: null,
-      selectedDimension: null
-    }
-  }
-  componentDidMount() {
-
-  }
+class TasksTab extends Component {
   render() {
+    return (
+      <Paginator searchText={ gettext("ID") } onSearch={async (keywords, page) => {
+        let result = await window.FU.searchTasks(keywords, page);
+        return {
+          rows: result.tasks,
+          maxPages: result.maxPages
+        }
+      }} header={(search) => {
+        return (
+          <Fragment>
+            <div className="column-id">
+              { gettext("ID") }
+            </div>
+            <div className="column-drawable">
+              { gettext("Drawable") }
+            </div>
+
+            <div className="column-state">
+              { gettext("State") }
+            </div>
+          </Fragment>
+        )
+      }} columns={3} row={(task, search) => {
+        return (
+          <Fragment>
+            <div className="column-id">
+              { task.id }
+            </div>
+            <div className="column-drawable">
+              { task.drawable.id }
+            </div>
+            <div className="column-state">
+              { task.drawable.state }
+            </div>
+          </Fragment>
+        )
+      }} />
+    )
+  }
+}
+
+export default class Admin extends PermissionRequired {
+  constructor(props) {
+    super(props, {
+      isAdmin: true
+    });
+  }
+  renderWithPermissions() {
      return (
       <div className="admin-page">
         <Tabs>
           <Tab title={ gettext("Universes") }>
-            <h2> { gettext("Universes") } </h2>
-            <Paginator searchText={ gettext("Name or function") } onSearch={async (keywords, page) => {
-              let result = await window.FU.searchUniverses(keywords, page);
-              return {
-                rows: result.universes,
-                maxPages: result.maxPages
-              }
-            }} header={(search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { gettext("ID") }
-                  </div>
-                  <div className="column-name">
-                    { gettext("Name") }
-                  </div>
-                  <div className="column-function">
-                    { gettext("Function") }
-                  </div>
-                  <div className="column-buttons">
-                    <Button withIcon={AddIcon} onClick={() => {
-                      window.showPopup(<AddUniversePopup onSave={() => {
-                        search(1);
-                      }} />)
-                    }}> </Button>
-                  </div>
-                </Fragment>
-              )
-            }} columns={4} row={(universe, search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { universe.id }
-                  </div>
-                  <div className="column-name">
-                    { universe.name }
-                  </div>
-                  <div className="column-function">
-                    { universe.function }
-                  </div>
-                  <div className="column-buttons">
-                    <Button withIcon={DeleteIcon} onClick={async () => {
-                        await window.FU.deleteUniverse(universe.id);
-                        search();
-                    }}> </Button>
-                  </div>
-                </Fragment>
-              )
-            }} onSelect={(universe) => {
-              this.setState({ selectedUniverse: universe, selectedDimension: null });
-            }} />
-            { this.state.selectedUniverse ? (
-              <Fragment>
-                <h2> { gettext("Dimensions") } </h2>
-                <Paginator index={this.state.selectedUniverse.id} searchText={ gettext("Name or parameter") } onSearch={async (keywords, page) => {
-                  let result = await window.FU.searchDimensions(this.state.selectedUniverse.id, keywords, page);
-                  return {
-                    rows: result.dimensions,
-                    maxPages: result.maxPages
-                  }
-                }} header={(search) => {
-                  return (
-                    <Fragment>
-                      <div className="column-id">
-                        { gettext("ID") }
-                      </div>
-                      <div className="column-name">
-                        { gettext("Name") }
-                      </div>
-                      <div className="column-parameter">
-                        { gettext("Parameter") }
-                      </div>
-                      <div className="column-buttons">
-                        <Button withIcon={AddIcon} onClick={() => {
-                          window.showPopup(<AddDimensionPopup universe={this.state.selectedUniverse.id} onSave={() => {
-                            search(1);
-                          }} />)
-                        }}> </Button>
-                      </div>
-                    </Fragment>
-                  )
-                }} columns={4} row={(dimension, search) => {
-                  return (
-                    <Fragment>
-                      <div className="column-id">
-                        { dimension.id }
-                      </div>
-                      <div className="column-name">
-                        { dimension.name }
-                      </div>
-                      <div className="column-parameter">
-                        { dimension.parameter }
-                      </div>
-                      <div className="column-buttons">
-                        <Button withIcon={DeleteIcon} onClick={async () => {
-                            await window.FU.deleteDimension(dimension.id);
-                            search();
-                        }}> </Button>
-                      </div>
-                    </Fragment>
-                  )
-                }} onSelect={(dimension) => {
-                  this.setState({ selectedDimension: dimension });
-                }} />
-              </Fragment>
-            ) : null }
-            { this.state.selectedDimension ? (
-              <Button onClick={() => {
-                openDimensionMap(this.state.selectedDimension);
-              }}> { gettext("Open map") } </Button>
-            ) : null }
+            <UniversesTab />
           </Tab>
           <Tab title={ gettext("Palettes") }>
-            <Paginator searchText={ gettext("ID or name") } onSearch={async (keywords, page) => {
-              let result = await window.FU.searchPalettes(keywords, page);
-              return {
-                rows: result.palettes,
-                maxPages: result.maxPages
-              }
-            }} header={(search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { gettext("ID") }
-                  </div>
-                  <div className="column-name">
-                    { gettext("Name") }
-                  </div>
-                  <div className="column-palette">
-                    { gettext("Palette") }
-                  </div>
-                  <div className="column-user">
-                    { gettext("User") }
-                  </div>
-                  <div className="column-buttons">
-                    <Button withIcon={AddIcon} onClick={() => {
-                      window.showPopup(<EditPalettePopup onSave={() => {
-                        search(1);
-                      }} />)
-                    }}> </Button>
-                  </div>
-                </Fragment>
-              )
-            }} columns={5} row={(palette, search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { palette.id }
-                  </div>
-                  <div className="column-name">
-                    { palette.name }
-                  </div>
-                  <div className="column-palette">
-                    <Palette colors={palette.colors} gradations={palette.gradations} />
-                  </div>
-                  <div className="column-user">
-                    { palette.user }
-                  </div>
-                  <div className="buttons">
-                    <Button withIcon={DeleteIcon} onClick={async () => {
-                        await window.FU.deletePalette(palette.id);
-                        search();
-                    }}> </Button>
-                  </div>
-                </Fragment>
-              )
-            }} onSelect={(palette) => {
-              this.setState({ selectedPalette: palette });
-            }} />
+            <PalettesTab />
           </Tab>
           <Tab title={ gettext("Users") }>
             <UsersTab />
           </Tab>
           <Tab title={ gettext("Tasks") }>
-            <Paginator searchText={ gettext("ID") } onSearch={async (keywords, page) => {
-              let result = await window.FU.searchTasks(keywords, page);
-              return {
-                rows: result.tasks,
-                maxPages: result.maxPages
-              }
-            }} header={(search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { gettext("ID") }
-                  </div>
-                  <div className="column-drawable">
-                    { gettext("Drawable") }
-                  </div>
-
-                  <div className="column-state">
-                    { gettext("State") }
-                  </div>
-                </Fragment>
-              )
-            }} columns={3} row={(task, search) => {
-              return (
-                <Fragment>
-                  <div className="column-id">
-                    { task.id }
-                  </div>
-                  <div className="column-drawable">
-                    { task.drawable.id }
-                  </div>
-                  <div className="column-state">
-                    { task.drawable.state }
-                  </div>
-                </Fragment>
-              )
-            }} />
+            <TasksTab />
           </Tab>
           <Tab title={ gettext("Config") }>
             Tab with config
@@ -421,84 +453,3 @@ export default class Admin extends Component {
     )
   }
 }
-
-// <AsyncContentProvider loadCallback={this.loadUniverses}>
-//   <h2> Вселенные </h2>
-//   <div className="row">
-//     <Dropdown selected={this.state.selectedUniverse && this.state.selectedUniverse.id} variants={ this.state.universes.map((universe) => {
-//       return { value: universe.function, id: universe.id }
-//     }) } onSelect={(id) => {
-//       this.setState({ selectedUniverse: this.state.universes.find((element) => element.id == id) })
-//     }} placeholder="Вселенные" />
-//     <Button onClick={() => {
-//       window.showPopup(<EditUniversePopup onSave={(universe) => {
-//         this.setState((old) => {
-//           old.universes.push(universe);
-//           old.selectedUniverse = old.universes[old.universes.length - 1];
-//           return old;
-//         });
-//       }} />);
-//     }} withIcon={AddIcon}> </Button>
-//     <Button disabled={!this.state.selectedUniverse} onClick={() => {
-//       window.showPopup(<EditUniversePopup universe={this.state.selectedUniverse} onSave={(universe) => {
-//         this.setState((old) => {
-//           old.universes[old.universes.indexOf(this.state.selectedUniverse)] = universe;
-//           old.selectedUniverse = universe;
-//           return old;
-//         })
-//       }} />);
-//     }} withIcon={EditIcon}> </Button>
-//     <AsyncButton disabled={!this.state.selectedUniverse} onClick={async () => {
-//       let universe = this.state.selectedUniverse;
-//       await window.FU.deleteUniverse(universe.id);
-//       this.setState((old) => {
-//         old.universes.splice(old.universes.indexOf(universe), 1);
-//         old.selectedUniverse = old.universes[0];
-//         return old;
-//       })
-//     }} withIcon={DeleteIcon}> </AsyncButton>
-//   </div>
-//   { this.state.selectedUniverse ? (
-//     <AsyncContentProvider loadCallback={this.loadDimensions} index={this.state.selectedUniverse}>
-//       <h2> Измерения </h2>
-//       <div className="row">
-//         <Dropdown selected={this.state.selectedDimension && this.state.selectedDimension.id} variants={ this.state.dimensions.map((dimension) => {
-//           return { value: dimension.parameter, id: dimension.id }
-//         }) } onSelect={(id) => {
-//           this.setState({ selectedDimension: this.state.dimensions.find((element) => element.id == id) })
-//         }} placeholder="Измерения" />
-//         <Button onClick={() => {
-//           window.showPopup(<EditDimentsionPopup onSave={(dimension) => {
-//             this.setState((old) => {
-//               old.dimensions.push(dimension);
-//               old.selectedDimension = old.dimensions[old.dimensions.length - 1];
-//               return old;
-//             });
-//           }} universe={this.state.selectedUniverse} />);
-//         }} withIcon={AddIcon}> </Button>
-//         <Button disabled={!this.state.selectedDimension} onClick={() => {
-//           window.showPopup(<EditDimentsionPopup dimension={this.state.selectedDimension} onSave={(dimension) => {
-//             this.setState((old) => {
-//               old.dimensions[old.dimensions.indexOf(this.state.selectedDimension)] = dimension;
-//               old.selectedDimension = dimension;
-//               return old;
-//             })
-//           }} />);
-//         }} withIcon={EditIcon}> </Button>
-//         <AsyncButton disabled={!this.state.selectedDimension} onClick={async () => {
-//           let dimension = this.state.selectedDimension;
-//           await window.FU.deleteDimension(dimension.id);
-//           this.setState((old) => {
-//             old.dimensions.splice(old.dimensions.indexOf(dimension), 1);
-//             old.selectedDimension = old.dimensions[0];
-//             return old;
-//           })
-//         }} withIcon={DeleteIcon}> </AsyncButton>
-//       </div>
-//       <h2> { gettext("Dimension map") } </h2>
-//       { this.state.selectedDimension ? (
-//         <DimensionMap dimension={this.state.selectedDimension} />
-//       ) : null }
-//     </AsyncContentProvider>
-//   ) : null }
-// </AsyncContentProvider>

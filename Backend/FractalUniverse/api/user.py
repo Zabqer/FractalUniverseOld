@@ -8,45 +8,28 @@ from rest_framework.status import (
     HTTP_200_OK
 )
 from ..models import User, Palette
-import ast
 from django.utils.translation import gettext as _
 from .. import utils
 from rest_framework import serializers
-from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
+
 
 class DeleteSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
+
 
 class SearchSerializer(serializers.Serializer):
     keywords = serializers.CharField(allow_blank=True)
     page = serializers.IntegerField(required=True, min_value = 1)
 
+
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def search(request):
-    serializer = SearchSerializer(data = request.data)
-    serializer.is_valid(raise_exception=True)
-    keywords = serializer.data["keywords"]
-    if len(keywords) == 0:
-        users = User.objects.all().order_by("-id")
-    else:
-        users = User.objects.filter(Q(login__icontains = keywords) | Q(email__icontains = keywords)).order_by("-id");
-    paginator = Paginator(users, 5)
-    try:
-        page = paginator.page(serializer.data["page"])
-    except EmptyPage:
-        return Response({
-            "detail": _("Page not found.")
-        }, status = HTTP_404_NOT_FOUND)
-    response = []
-    for user in page.object_list:
-        response.append(utils.user_info(user, True))
-    return Response({
-        "maxPages": paginator.num_pages,
-        "users": response
-    }, status = HTTP_200_OK)
+    def searchf(objects, keywords):
+        return objects.filter(Q(login__icontains=keywords) | Q(email__icontains=keywords))
+    return utils.search(User, request, searchf, utils.user_info)
 
 @csrf_exempt
 @api_view(["GET", "DELETE"])

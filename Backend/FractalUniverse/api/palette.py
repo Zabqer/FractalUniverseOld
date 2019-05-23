@@ -21,13 +21,16 @@ class PostSerializer(serializers.Serializer):
         required=True,
         child=serializers.IntegerField(min_value=0, max_value=16777215)
     )
+    glob = serializers.BooleanField(default=False)
 
 
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def search(request):
-    return utils.search(Palette, request, utils.palette_info)
+    def searchf(objects, keywords):
+        return objects.filter(name__icontains=keywords)
+    return utils.search(Palette, request, searchf, utils.palette_info)
 
 
 @csrf_exempt
@@ -45,7 +48,7 @@ def palettes(request, id = None):
                 "detail": _("Palette arleady exists.")
             }, status=HTTP_400_BAD_REQUEST)
         palette = Palette.objects.create(
-            user=request.user,
+            user=serializer.data["glob"] and request.user or None,
             name=serializer.data["name"],
             colors=serializer.data["colors"],
             gradations=serializer.data["gradations"]

@@ -31,22 +31,22 @@ class SearchSerializer(serializers.Serializer):
     page = serializers.IntegerField(required=True, min_value=1)
 
 
-def search(Class, request, sfunction):
-    plural_name = Class._meta.verbose_name_plural
+def search(Class, request, filter, sfunction):
+    plural_name = str(Class._meta.verbose_name_plural)
     serializer = SearchSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     keywords = serializer.data["keywords"]
     if len(keywords) == 0:
         universes = Class.objects.all().order_by("-id")
     else:
-        universes = Class.objects.filter(name__icontains = keywords).order_by("-id")
+        universes = filter(Class.objects, keywords).order_by("-id")
     paginator = Paginator(universes, settings.PAGINATOR_PAGES)
     try:
         page = paginator.page(serializer.data["page"])
     except EmptyPage:
         return Response({
             "detail": _("Page not found.")
-        }, status = HTTP_404_NOT_FOUND)
+        }, status=HTTP_404_NOT_FOUND)
     response = []
     for obj in page.object_list:
         response.append(sfunction(obj))
@@ -103,7 +103,7 @@ def palette_info(palette):
     return {
         "id": palette.id,
         "name": palette.name,
-        "user": palette.user.id,
+        "user": palette.user and palette.user.id or None,
         "colors": ast.literal_eval(palette.colors),
         "gradations": palette.gradations
     }

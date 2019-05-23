@@ -28,7 +28,7 @@ export default class EditPalettePopup extends Component {
             <Input name="gradations" placeholder={gettext("Gradations")} type="number" min={0} parent={this} />
           </div>
           <div className="row">
-            <Palette colors={this.state.colors} gradations={Number(this.state.gradations)} />
+            <Palette colors={this.state.colors} gradations={Number(this.state.gradations)} onChange={console.log} />
             <Button withIcon={AddIcon} onClick={() => {
               this.setState((state) => {
                 state.colors.push(0x0);
@@ -38,7 +38,7 @@ export default class EditPalettePopup extends Component {
           </div>
           <div className="buttons popup-buttons">
             <AsyncButton onClick={async () => {
-                let result = await window.FU.addPalette(this.state.name, this.state.colors, this.state.gradations);
+                let result = await window.FU.addPalette(this.state.name, this.state.colors, this.state.gradations, this.props.global);
                 if (result.success) {
                   window.hidePopup();
                 }
