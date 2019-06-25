@@ -22,7 +22,7 @@ export default class PermissionRequired extends Component {
           </div>
         )
       }
-      if (this.isAdmin == true && (!window.FU.loggedAs && window.FU.loggedAs.isAdmin)) {
+      if (this.isAdmin == true && (!window.FU.loggedAs || !window.FU.loggedAs.isAdmin)) {
         return (
           <div className="login-required">
             { gettext("To access this page you need to have admin privelegies") }

@@ -70,15 +70,19 @@ export default class LoginPopup extends Component {
                   sitekey="6Ld_dZYUAAAAADYclvtGmWVBCZmNFr0sLLLgs61m"
                   render="explicit"
                   verifyCallback={async (captcha) => {
-                    let result = await window.FU.login(this.state.login, this.state.password, this.state.rememberMe, captcha);
-                    if (result === true) {
+                    try {
+                      await window.FU.login(this.state.login, this.state.password, this.state.rememberMe, captcha);
                       window.hidePopup();
-                    } else {
-                      if (result.login) {
-                        this.setState({ loginError: result.login });
+                    } catch (e) {
+                      console.log(e)
+                      if (e.login) {
+                        this.setState({ loginError: e.login });
                       }
-                      if (result.password) {
-                        this.setState({ passwordError: result.password });
+                      if (e.password) {
+                        this.setState({ passwordError: e.password });
+                      }
+                      if (e.detail) {
+                        window.showError(e.detail);
                       }
                       this.setState({ stage: "form" });
                     }

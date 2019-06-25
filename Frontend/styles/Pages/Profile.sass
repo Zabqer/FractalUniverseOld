@@ -6,27 +6,6 @@
   40%, 100%
     left: 150%
 
-.edit-palette-popup
-  .buttons
-    display: flex
-    flex-direction: row
-    .button-container
-      flex: 1
-  .palette-edit
-    .palette
-      .gradation
-        width: 100%
-        display: flex
-        flex-direction: row
-        .color
-          position: relative
-          flex: 1
-          display: flex
-          flex-direction: row
-          height: 40px
-          &.editable
-            border-bottom: 2px solid black
-
 .profile-page
   display: grid
   grid-template-columns: 1fr 1fr
@@ -94,40 +73,9 @@
       .admin-badget
         background-color: #b71c1c
         box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 12px -5px rgba(183,28,28,.46)
-  .list-palettes
-    grid-area: list-palettes
-    color: $text-color
-    .description
-      font-size: 20px
-    .list
-      .palette
-        display: flex
-        flex-direction: column
-        .name
-          padding: 5px
-          font-size: 18px
-        .palette-view
-          display: flex
-          flex-direction: row
-          .gradation
-            padding: 10px
-            flex: 1
-            display: flex
-            flex-direction: row
-            div
-              flex: 1
-              font-weight: 500
-              font-size: 10px
-              height: 40px
-              &:first-child
-                border-top-left-radius: 6px
-                border-bottom-left-radius: 6px
-              &:last-child
-                border-top-right-radius: 6px
-                border-bottom-right-radius: 6px
-  .list-tasks
-    grid-area: list-tasks
-    color: $text-color
-    .description
-      font-size: 20px
-    .list
+  .palettes-paginator
+    .results
+      grid-template-columns: auto 1fr 1fr auto
+  .tasks-paginator
+    .results
+      grid-template-columns: auto 1fr 1fr

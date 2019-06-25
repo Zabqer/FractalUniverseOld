@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ...fractal_utils import task_manager
+from ...utils import task_manager
 
 class Command(BaseCommand):
     help = "Run queued draw tasks"

@@ -5,6 +5,7 @@ import Button from "./Elements/Button";
 import AsyncButton from "./Elements/AsyncButton";
 
 import LoginPopup from "./Popups/Login";
+import selectPalette from "./Popups/SelectPalettePopup";
 
 import "../styles/Header.sass";
 
@@ -43,6 +44,11 @@ export default class Header extends Component {
           <Link to="/admin">
             { gettext("Admin") }
           </Link>
+          <Button onClick={() => {
+              selectPalette();
+            }}>
+            { gettext("Palette") }
+          </Button>
           <div className="user-buttons">
             { window.FU.loggedAs ? (
               <Fragment>

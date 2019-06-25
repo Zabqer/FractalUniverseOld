@@ -1,7 +1,10 @@
 FractalUniverse
 
 TODO
+- Live update
 - Config
+- !Ratelimit
+- Profile sessions
 - Admin sessions
-- Ratelimit
-- User sessions
+- HTML template email
+- Admin id entry in URL

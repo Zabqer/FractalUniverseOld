@@ -4,11 +4,17 @@ import operator
 binops = {
     ast.Add: operator.add,
     ast.Mult: operator.mul,
-    ast.Pow: operator.pow
+    ast.Pow: operator.pow,
+    ast.Sub: operator.sub,
+    ast.Div: operator.truediv
 }
 
 unops = {
     ast.USub: operator.neg,
+}
+
+calls = {
+    "abs": abs
 }
 
 def compile(formula):
@@ -22,6 +28,8 @@ def compile(formula):
                 return expression.n
             elif isinstance(expression, ast.Name):
                 return vars[expression.id]
+            elif isinstance(expression, ast.Call):
+                return calls[expression.func.id](*[_eval(arg) for arg in expression.args])
             else:
                 raise ValueError("unknown action " + str(ast.dump(expression)))
 

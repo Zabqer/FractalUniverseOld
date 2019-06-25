@@ -6,10 +6,11 @@ import Header from "./Header";
 
 import Parallax from "./Elements/Parallax";
 
-import Images from "./Pages/Images";
+import Main from "./Pages/Main";
 import Register from "./Pages/Register";
 import Profile from "./Pages/Profile";
 import Admin from "./Pages/Admin";
+import Dimension from "./Pages/Dimension";
 import ActivateEmail from "./Pages/ActivateEmail";
 import NotFound from "./Pages/NotFound";
 
@@ -21,7 +22,13 @@ export default class UI extends Component {
     }
   }
   componentDidMount() {
-    window.update = () => this.forceUpdate();
+    window.forceUpdating = false;
+    window.update = () => {
+      console.log("[FractalUniverse] Here we go again");
+      window.forceUpdating = true;
+      this.forceUpdate();
+      window.forceUpdating = false;
+    };
     window.showPopup = popup => {
       document.body.style.overflow = "hidden";
       this.setState(state => {
@@ -42,6 +49,16 @@ export default class UI extends Component {
         }
       });
     };
+    window.showError = message => window.showPopup(
+      <div className="error-popup popup">
+        <div className="header">
+          { gettext("Error") }
+        </div>
+        <div className="content">
+          { message }
+        </div>
+      </div>
+    );
   }
   render() {
     return (
@@ -68,14 +85,15 @@ export default class UI extends Component {
         <div className="page">
           <ReactCSSTransitionGroup transitionName="page-change" transitionEnterTimeout={300} transitionLeaveTimeout={150}>
             <Switch>
-              <Route exact path="/" component={Images} />
+              <Route exact path="/" component={Main} />
               {/*<LoggedInRequired isLogin={false}>*/}
-                <Route path="/register" component={Register} />
+              <Route path="/register" component={Register} />
               {/*</LoggedInRequired>*/}
               {/*<LoggedInRequired isLogin={true}>*/}
-                <Route path="/profile" component={Profile} />
+              <Route path="/profile" component={Profile} />
               {/*</LoggedInRequired>*/}
-                <Route path="/admin" component={Admin} />
+              <Route path="/admin" component={Admin} />
+              <Route path="/dimension/:id(\d+)" component={Dimension} />
               <Route path="/activate/:user(\d+)/:hash(.+)" component={ActivateEmail} />
               <Route component={NotFound} />
             </Switch>

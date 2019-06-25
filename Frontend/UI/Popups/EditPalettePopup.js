@@ -12,6 +12,7 @@ export default class EditPalettePopup extends Component {
     super(props);
     this.state = {
       name: "",
+      nameError: null,
       gradations: 0,
       colors: [0xFF00FF, 0x00FF00]
     }
@@ -38,11 +39,18 @@ export default class EditPalettePopup extends Component {
           </div>
           <div className="buttons popup-buttons">
             <AsyncButton onClick={async () => {
+              try {
                 let result = await window.FU.addPalette(this.state.name, this.state.colors, this.state.gradations, this.props.global);
-                if (result.success) {
-                  window.hidePopup();
-                }
+                window.hidePopup();
                 this.props.onSave();
+              } catch (e) {
+                if (e.detail) {
+                  window.showError(e.detail);
+                }
+                if (e.name) {
+                  this.setState({ nameError: e.name });
+                }
+              }
             }}> { gettext("Add") } </AsyncButton>
             <Button onClick={() => window.hidePopup()}> { gettext("Cancel") } </Button>
           </div>

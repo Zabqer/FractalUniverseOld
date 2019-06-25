@@ -12,7 +12,7 @@ export default class Input extends Component {
   render() {
     return (
       <div className="input-container">
-        <input id={this.id} pattern={this.props.pattern} name={this.props.name} type={this.props.type} autoComplete={this.props.autoComplete} placeholder=" " value={this.props.parent.state[this.props.name]} min={this.props.min} onChange={({ target }) => {
+        <input id={this.id} pattern={this.props.pattern} name={this.props.name} type={this.props.type} autoComplete={this.props.autoComplete} placeholder=" " value={this.props.parent.state[this.props.name]} min={this.props.min} max={this.props.max} step={this.props.step} onChange={({ target }) => {
           this.props.parent.setState({
             [this.props.name]: target.value,
             [this.props.name + "Error"]: null

@@ -5,14 +5,7 @@ import "../../styles/Elements/ColorPicker.sass";
 import Button from "../Elements/Button";
 import Input from "../Elements/Input";
 
-import { rgb2hsv, hsv2rgb, decimal2hex } from "../../logic/utils";
-
-function offset(el) {
-    var rect = el.getBoundingClientRect(),
-    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    return { top: rect.top + scrollTop, left: rect.left + scrollLeft, width: rect.width, height: rect.height }
-}
+import { rgb2hsv, hsv2rgb, decimal2hex, elementOffset } from "../../logic/utils";
 
 export default class ColorPicker extends Component {
   constructor(props) {
@@ -45,7 +38,7 @@ export default class ColorPicker extends Component {
     });
   }
   onPickerMove(pageX, pageY, target) {
-    let rect = offset(target);
+    let rect = elementOffset(target);
     let percentX = (pageX - rect.left) / rect.width;
     let percentY = 1 - (pageY - rect.top) / rect.height;
     this.upateColor({ saturation: percentX, value: percentY });

@@ -12,8 +12,6 @@ import Paginator from "../Elements/Paginator";
 import openDimensionMap from "../Elements/DimensionMap";
 
 import EditPalettePopup from "../Popups/EditPalettePopup";
-
-
 import PermissionRequired from "../PermissionRequired";
 
 //
@@ -46,21 +44,21 @@ class AddUniversePopup extends Component {
           <Input name="function" parent={this} placeholder={ gettext("Function") } />
           <div className="buttons popup-buttons">
             <AsyncButton onClick={async () => {
-              let result = await window.FU.addUniverse(this.state.name, this.state.function);
-              if (result.success) {
-                this.props.onSave(result.universe);
-                window.hidePopup();
-              } else {
-                if (result.detail) {
-                  window.showError(result.detail);
+                try {
+                  let result = await window.FU.addUniverse(this.state.name, this.state.function);
+                  this.props.onSave(result.universe);
+                  window.hidePopup();
+                } catch (e) {
+                  if (e.detail) {
+                    window.showError(e.detail);
+                  }
+                  if (e.name) {
+                    this.setState({ nameError: e.name });
+                  }
+                  if (e.function) {
+                    this.setState({ functionError: e.function });
+                  }
                 }
-                if (result.name) {
-                  this.setState({ nameError: result.name });
-                }
-                if (result.function) {
-                  this.setState({ functionError: result.function });
-                }
-              }
             }}> { gettext("Add") } </AsyncButton>
             <Button onClick={() => window.hidePopup()}> { gettext("Cancel") } </Button>
           </div>
@@ -91,19 +89,19 @@ class AddDimensionPopup extends Component {
           <Input name="parameter" parent={this} placeholder={ gettext("Parameter") } />
           <div className="buttons popup-buttons">
             <AsyncButton onClick={async () => {
-              let result = await window.FU.addDimension(this.props.universe, this.state.name, this.state.parameter);
-              if (result.success) {
+              try {
+                let result = await window.FU.addDimension(this.props.universe, this.state.name, this.state.parameter);
                 this.props.onSave(result.dimension);
                 window.hidePopup();
-              } else {
-                if (result.detail) {
-                  window.showError(result.detail);
+              } catch (e) {
+                if (e.detail) {
+                  window.showError(e.detail);
                 }
-                if (result.name) {
-                  this.setState({ nameError: result.name });
+                if (e.name) {
+                  this.setState({ nameError: e.name });
                 }
-                if (result.parameter) {
-                  this.setState({ parameterError: result.parameter });
+                if (e.parameter) {
+                  this.setState({ parameterError: e.parameter });
                 }
               }
             }}> { gettext("Add") } </AsyncButton>
@@ -127,7 +125,7 @@ class UniversesTab extends Component {
     return (
       <Fragment>
         <h2> { gettext("Universes") } </h2>
-        <Paginator searchText={ gettext("Name or function") } onSearch={async (keywords, page) => {
+        <Paginator className="universes-paginator" searchText={ gettext("Name or function") } onSearch={async (keywords, page) => {
           let result = await window.FU.searchUniverses(keywords, page);
           return {
             rows: result.universes,
@@ -154,7 +152,7 @@ class UniversesTab extends Component {
               </div>
             </Fragment>
           )
-        }} columns={4} row={(universe, search) => {
+        }} row={(universe, search) => {
           return (
             <Fragment>
               <div className="column-id">
@@ -180,7 +178,7 @@ class UniversesTab extends Component {
         { this.state.selectedUniverse ? (
           <Fragment>
             <h2> { gettext("Dimensions") } </h2>
-            <Paginator index={this.state.selectedUniverse.id} searchText={ gettext("Name or parameter") } onSearch={async (keywords, page) => {
+            <Paginator className="dimensions-paginator" index={this.state.selectedUniverse.id} searchText={ gettext("Name or parameter") } onSearch={async (keywords, page) => {
               let result = await window.FU.searchDimensions(this.state.selectedUniverse.id, keywords, page);
               return {
                 rows: result.dimensions,
@@ -207,7 +205,7 @@ class UniversesTab extends Component {
                   </div>
                 </Fragment>
               )
-            }} columns={4} row={(dimension, search) => {
+            }} row={(dimension, search) => {
               return (
                 <Fragment>
                   <div className="column-id">
@@ -233,9 +231,62 @@ class UniversesTab extends Component {
           </Fragment>
         ) : null }
         { this.state.selectedDimension ? (
-          <Button onClick={() => {
-            openDimensionMap(this.state.selectedDimension);
-          }}> { gettext("Open map") } </Button>
+          <Fragment>
+            <Button onClick={() => {
+              openDimensionMap(this.state.selectedDimension);
+            }}> { gettext("Open map") } </Button>
+            <h2> { gettext("Fractals") } </h2>
+            <Paginator className="fractals-paginator" index={this.state.selectedDimension.id} searchText={ gettext("Name") } onSearch={async (keywords, page) => {
+                let result = await window.FU.searchFractals(this.state.selectedDimension.id, keywords, page);
+                return {
+                  rows: result.fractals,
+                  maxPages: result.maxPages
+                }
+              }} header={(search) => {
+                return (
+                  <Fragment>
+                    <div className="column-id">
+                      { gettext("ID") }
+                    </div>
+                    <div className="column-x">
+                      { gettext("X") }
+                    </div>
+                    <div className="column-y">
+                      { gettext("Y") }
+                    </div>
+                    <div className="column-buttons">
+                      <Button withIcon={AddIcon} onClick={() => {
+                        window.showPopup(<AddFractalPopup fractal={this.state.selectedFractal.id} onSave={() => {
+                          search(1);
+                        }} />)
+                      }}> </Button>
+                    </div>
+                  </Fragment>
+                )
+              }} row={(fractal, search) => {
+                return (
+                  <Fragment>
+                    <div className="column-id">
+                      { fractal.id }
+                    </div>
+                    <div className="column-x">
+                      { fractal.x }
+                    </div>
+                    <div className="column-y">
+                      { fractal.y }
+                    </div>
+                    <div className="column-buttons">
+                      <Button withIcon={DeleteIcon} onClick={async () => {
+                          await window.FU.deleteFractal(fractal.id);
+                          search();
+                      }}> </Button>
+                    </div>
+                  </Fragment>
+                )
+              }} onSelect={(dimension) => {
+                this.setState({ selectedFractal: dimension });
+              }} />
+          </Fragment>
         ) : null }
       </Fragment>
     )
@@ -251,7 +302,7 @@ class PalettesTab extends Component {
   }
   render() {
     return (
-      <Paginator searchText={ gettext("ID or name") } onSearch={async (keywords, page) => {
+      <Paginator className="palettes-paginator" searchText={ gettext("ID or name") } onSearch={async (keywords, page) => {
         let result = await window.FU.searchPalettes(keywords, page);
         return {
           rows: result.palettes,
@@ -281,7 +332,7 @@ class PalettesTab extends Component {
             </div>
           </Fragment>
         )
-      }} columns={5} row={(palette, search) => {
+      }} row={(palette, search) => {
         return (
           <Fragment>
             <div className="column-id">
@@ -321,7 +372,7 @@ class UsersTab extends Component {
   render() {
     return (
       <div className="users-tab">
-        <Paginator searchText={ gettext("Name") } onSearch={async (keywords, page) => {
+        <Paginator className="users-paginator" searchText={ gettext("Name") } onSearch={async (keywords, page) => {
           let result = await window.FU.searchUsers(keywords, page);
           return {
             rows: result.users,
@@ -333,8 +384,8 @@ class UsersTab extends Component {
               <div className="column-id">
                 { gettext("ID") }
               </div>
-              <div className="column-login">
-                { gettext("Login") }
+              <div className="column-username">
+                { gettext("Username") }
               </div>
               <div className="column-email">
                 { gettext("Email") }
@@ -346,13 +397,13 @@ class UsersTab extends Component {
               </div>
             </Fragment>
           )
-        }} columns={5} row={(user, search) => {
+        }} row={(user, search) => {
           return (
             <Fragment>
               <div className="column-id">
                 { user.id }
               </div>
-              <div className="column-login">
+              <div className="column-username">
                 { user.login }
               </div>
               <div className="column-email">
@@ -383,7 +434,7 @@ class UsersTab extends Component {
 class TasksTab extends Component {
   render() {
     return (
-      <Paginator searchText={ gettext("ID") } onSearch={async (keywords, page) => {
+      <Paginator className="tasks-paginator" searchText={ gettext("ID") } onSearch={async (keywords, page) => {
         let result = await window.FU.searchTasks(keywords, page);
         return {
           rows: result.tasks,
@@ -395,26 +446,25 @@ class TasksTab extends Component {
             <div className="column-id">
               { gettext("ID") }
             </div>
-            <div className="column-drawable">
-              { gettext("Drawable") }
+            <div className="column-fractal">
+              { gettext("Fractal") }
             </div>
-
             <div className="column-state">
               { gettext("State") }
             </div>
           </Fragment>
         )
-      }} columns={3} row={(task, search) => {
+      }} row={(task, search) => {
         return (
           <Fragment>
             <div className="column-id">
               { task.id }
             </div>
-            <div className="column-drawable">
-              { task.drawable.id }
+            <div className="column-fractal">
+              { task.fractal.id }
             </div>
             <div className="column-state">
-              { task.drawable.state }
+              { task.fractal.state }
             </div>
           </Fragment>
         )

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, re_path
-from FractalUniverse.api import auth, user, palette, universe, dimension, fractal, task, test
+from FractalUniverse.api import session, user, universe, dimension, fractal, task, palette
 from django.shortcuts import render
 from django.conf import settings
 from django.conf.urls.static import static
@@ -13,28 +13,59 @@ def renderApp(request):
 
 urlpatterns = [
 # !!
-    path("api/test", test.test),
     # path("sse/", sse.sse),
 # !!
     path("fake_admin/", admin.site.urls),
-    path("api/auth/register", auth.register),
-    path("api/auth/activate", auth.activate),
-    path("api/auth/login", auth.login),
-    path("api/auth/logout", auth.logout),
-    path("api/users", user.users),
-    path("api/users/search", user.search),
-    path("api/universes", universe.universes),
-    path("api/universes/search", universe.search),
-    path("api/universes/<int:universe>", universe.universes),
-    path("api/universes/<int:universe>/dimensions", dimension.dimensions),
-    path("api/universes/<int:universe>/dimensions/search", dimension.search),
-    # path("api/universes/<int:universe>/dimensions/<int:dimension>", dimension.dimensions),
-    path("api/dimensions/<int:dimension>", dimension.dimensions),
-    path("api/tasks/search", task.search),
-    path("api/palettes", palette.palettes),
-    path("api/palettes/<int:id>", palette.palettes),
-    path("api/palettes/search", palette.search),
+    # TODO: Impliment more methods
+    path("api/session", session.View.as_view()),
+    # POST - Create new session (Login) (Any)
+    # DELETE - Delete session (Logout) (Authenticated)
+    path("api/user", user.View.as_view()),  # TODO: User info by id
+    # GET - Get user info (Authenticated)
+    # POST - Register new user (Any)
+    # TODO: PUT - Edit user info (Authenticated)
+    # DELTE - Delete user (Authenticated)
+    path("api/user/activate", user.activate),
+    # POST - Activate user (Any)
+    path("api/user/search", user.search),
+    # POST - Search all users (Admin)
+    path("api/universe", universe.View.as_view()),
+    # POST - Add new universe (Admin)
+    path("api/universe/<int:universe>", universe.View.as_view()),
+    # GET - Get universe info (Any)
+    # DELETE - Delete universe (Admin)
+    path("api/universe/search", universe.search),
+    # POST - Search all universes (Any)
+    path("api/universe/<int:universe>/dimension", dimension.View.as_view()),
+    # POST - Add new dimension (Admin)
+    path("api/universe/<int:universe>/dimension/search", dimension.search),
+    # POST - Search all dimensions in universe
+    path("api/dimension/<int:dimension>", dimension.View.as_view()),
+    # GET - Get dimension info (Any)
+    # DELETE - Delete dimension (Admin)
+    path("api/dimension/search", dimension.search),
+    # POST - Search all dimensions (Any)
+    path("api/dimension/<int:dimension>/fractal", fractal.View.as_view()),
+    # POST - Add new fractal (Primium)
+    path("api/dimension/<int:dimension>/fractal/search", fractal.search),
+    # POST - Search all fractals in dimension (Any)
+    path("api/task/search", task.search),
+    # POST - Search tasks (Authenticated)
+    path("api/user/task/search", task.user_search),
+    # POST - Search user tasks (Authenticated)
+    path("api/palette", palette.View.as_view()),
+    # POST - Add new palette (Premium)
+    path("api/palette/<int:palette>", palette.View.as_view()),
+    # GET - Get palette info (Any)
+    # TODO: PUT - Edit palette (Authenticated)
+    # DELETE - Delete palette (Authenticated)
+    path("api/palette/search", palette.search),
+    # POST - Search all palettes (Any)
+    path("api/palette/default", palette.default),
+    # GET - Get season palette (Any)
+    path("api/user/palette/search", palette.user_search),
+    # POST - Search user palettes (Authenticated)
     path("jsi18n/", JavaScriptCatalog.as_view(packages=("FractalUniverse",)), name="javascript-catalog"),
     *static(settings.STATIC_URL, document_root=settings.STATIC_ROOT),
-    re_path("^", renderApp),
+    re_path("^(?!api/)", renderApp),
 ]

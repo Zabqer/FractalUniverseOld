@@ -7,41 +7,25 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_200_OK
 )
-from ..models import DrawableCalculateTask, Drawable
+from ..models import FractalCalculateTask
 from django.utils.translation import gettext as _
-from rest_framework import serializers
-from .. import utils
-from django.core.paginator import Paginator, EmptyPage
+from ..utils import info, search_view
 
-class SearchSerializer(serializers.Serializer):
-    keywords = serializers.CharField(allow_blank=True)
-    page = serializers.IntegerField(required=True, min_value = 1)
 
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def search(request):
-    serializer = SearchSerializer(data = request.data)
-    serializer.is_valid(raise_exception=True)
-    keywords = serializer.data["keywords"]
-    if len(keywords) == 0:
-        tasks = DrawableCalculateTask.objects.all().order_by("-id")
-    else:
-        tasks = DrawableCalculateTask.objects.get(id = keywords).order_by("-id");
-    paginator = Paginator(tasks, 5)
-    try:
-        page = paginator.page(serializer.data["page"])
-    except EmptyPage:
-        return Response({
-            "detail": _("Page not found.")
-        }, status = HTTP_404_NOT_FOUND)
-    response = []
-    for task in page.object_list:
-        response.append({
-            "id": task.id,
-            "drawable": utils.drawable_info(task.drawable)
-        })
-    return Response({
-        "maxPages": paginator.num_pages,
-        "tasks": response
-    }, status = HTTP_200_OK)
+    return search_view.search(FractalCalculateTask, request, search_view.default_searchf, info.task, name="tasks")
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def user_search(request):
+    def searchf(objects, keywords):
+        if not keywords:
+            return objects.filter(user=request.user)
+        else:
+            return objects.filter(user=request.user, name__icontains=keywords)
+    return search_view.search(FractalCalculateTask, request, searchf, info.task, name="tasks")

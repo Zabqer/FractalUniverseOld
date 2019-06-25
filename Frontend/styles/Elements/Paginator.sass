@@ -1,0 +1,70 @@
+@import "../settings"
+
+.paginator
+  display: flex
+  flex-direction: column
+  &.loading
+    cursor: wait
+    pointer-events: none
+    opacity: .5
+  .search
+    display: flex
+    flex-direction: row
+    form
+      flex: 1
+      display: flex
+      .input-container
+        flex: 1
+  .results
+    padding: 10px
+    display: grid
+    .row
+      cursor: pointer
+      display: contents
+      &.selected>div
+        color: white
+        background-color: $primary-color
+      &>div
+        display: flex
+        justify-content: center
+        align-items: center
+        padding: 5px 10px
+    .header
+      display: contents
+      &>div
+        display: flex
+        justify-content: center
+        align-items: center
+    .column-buttons
+      display: flex
+      button
+        padding: 5px
+  .no-results
+    padding: 40px 0
+    display: flex
+    justify-content: center
+    align-items: center
+  .page-buttons
+    display: flex
+    flex-direction: row
+    background-color: #F6F6F6
+    .page-button
+      cursor: pointer
+      flex: 1
+      text-align: center
+      padding: 10px
+      transition: $default-transition
+      &.active
+        border-radius: 2px
+        cursor: default
+        color: white
+        background-color: $primary-color
+        box-shadow: $primary-box-shadow
+      &:not(.active):hover
+        background-color: #DDDDDD
+    .separator
+      cursor: default
+      padding: 5px
+      display: flex
+      justify-content: center
+      align-items: center

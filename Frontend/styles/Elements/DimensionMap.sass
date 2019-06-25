@@ -1,11 +1,29 @@
 @import "../settings"
 
 .dimension-map
+  display: flex
+  flex-direction: row
   .fractal-image
-    display: flex
-    justify-content: center
-    align-items: center
+    position: relative
+    user-select: none
     img
       object-fit: cover
       image-rendering: pixelated
-      box-shadow: $container-box-shadow
+    .x-rail, .y-rail
+      position: absolute
+      background-color: rgba(255, 255, 255, .5)
+      box-shadow: $low-container-box-shadow
+    .x-rail
+      left: 0
+      width: 100%
+      height: 2px
+    .y-rail
+      top: 0
+      height: 100%
+      width: 2px
+  .controls
+    display: flex
+    flex-direction: column
+    min-width: 200px
+    .button-container
+      margin: 10px

@@ -3,6 +3,7 @@ from google.oauth2 import service_account
 from googleapiclient.http import MediaInMemoryUpload
 from googleapiclient.discovery import build
 import io
+import urllib
 
 credentials = service_account.Credentials.from_service_account_file(settings.GOOGLE_API_AUTH_FILE, scopes=[
     "https://www.googleapis.com/auth/drive"
@@ -26,4 +27,8 @@ def addFractalImage(fractal_id, image):
             "type": "anyone"
         }).execute()
         print(file)
-        return (file.get("id"), file.get("webContentLink"))
+        url = file.get("webContentLink")
+        response = urllib.request.urlopen(url)
+        url = response.geturl()
+        print("Redirect url: " + url)
+        return (file.get("id"), url)

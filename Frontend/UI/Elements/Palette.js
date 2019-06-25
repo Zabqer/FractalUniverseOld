@@ -6,12 +6,11 @@ import { generatePalette, decimal2hex } from "../../logic/utils";
 
 import ColorPicker from "../Elements/ColorPicker";
 
-function isEqualArrays(a1, a2) {
-  console.log("isEqualArrays", a1, a2)
-  if (a1.length != a2.length) {
-    return false;
+function isUpdated(a1, a2, grad) {
+  if (a1.length != Math.floor(a2.length / grad)) {
+    return true;
   }
-  return true;
+  return false;
 }
 
 export default class Palette extends Component {
@@ -31,7 +30,7 @@ export default class Palette extends Component {
     })
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.gradations != this.props.gradations) {
+    if (nextProps.gradations != this.props.gradations || isUpdated(nextProps.colors, this.state.colors, this.state.gradations)) {
       let gradations = nextProps.gradations + 1;
       nextState.colors = this.generateColors(nextProps.colors, gradations);
       nextState.gradations = gradations;

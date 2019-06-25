@@ -5,6 +5,8 @@ import Input from "../Elements/Input";
 
 import SearchIcon from "../Icons/Search";
 
+import "../../styles/Elements/Paginator.sass";
+
 class PageButtons extends Component {
   generatePageButton(page) {
     return (
@@ -78,7 +80,7 @@ export default class Paginator extends Component {
   }
   render() {
     return (
-      <div className={`paginator ${this.state.isLoading ? "loading" : ""}`}>
+      <div className={`paginator ${this.state.isLoading ? "loading " : ""}${this.props.className}`}>
         <div className="search">
           <form onSubmit={(event) => {
             event.preventDefault();
@@ -92,7 +94,7 @@ export default class Paginator extends Component {
             this.search(1);
           }} withIcon={SearchIcon} />
         </div>
-        <div className={`results ${this.props.columns && ("columns-" + this.props.columns)}`}>
+        <div className="results">
           <div className="header">
             { this.props.header(this.search) }
           </div>
@@ -107,12 +109,13 @@ export default class Paginator extends Component {
                 </div>
               )
             })
-          ) : (
-            <div className="no-results">
-              { gettext("Oups.. No objects found.") }
-            </div>
-          ) }
+          ) : null }
         </div>
+        { this.state.rows.length == 0 ? (
+          <div className="no-results">
+            { gettext("Oups.. No objects found.") }
+          </div>
+        ) : null }
         { this.state.maxPages > 2 ? (
           <PageButtons page={this.state.page} maxPages={this.state.maxPages} onNavigate={(page) => this.search(page)} />
         ) : null }

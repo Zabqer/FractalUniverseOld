@@ -104,25 +104,11 @@ class Dimension(models.Model):  # Измерение
         on_delete=models.CASCADE, verbose_name="fractal",
         null=True, blank=True
     )  # Измерение
-    parameter = models.FloatField()  # Параметр (переделал из строки под число)
+    parameter = models.TextField()  # Параметр
     name = models.TextField()
 
 
 class Fractal(models.Model):
-    dimension = models.ForeignKey(
-        "Dimension", related_name="fractals",
-        on_delete=models.CASCADE, verbose_name="dimension"
-    )  # Измерение
-    x = models.FloatField()  # Коардинаты
-    y = models.FloatField()  # т.е v=x+y*1j
-    default_drawable = models.ForeignKey(
-        "Drawable", related_name="fractals",
-        on_delete=models.CASCADE, verbose_name="drawable",
-        null=True
-    )  # Дефолтный Drawable
-
-
-class Drawable(models.Model):
     STATE_UNKNOWN = 0
     STATE_IN_QUEUE = 1
     STATE_CALCULATING = 2
@@ -131,27 +117,34 @@ class Drawable(models.Model):
         (STATE_UNKNOWN, "UNKNOWN"),
         (STATE_IN_QUEUE, "IN_QUEUE"),
         (STATE_CALCULATING, "CALCULATING"),
-        (STATE_READY, "READY")
+        (STATE_READY, "FINISHED")
     )
     state = models.IntegerField(choices=STATES, default=0)  # Статус фрактала (или карты)
-    fractal = models.ForeignKey(
-        "Fractal", related_name="drawables",
-        on_delete=models.CASCADE, verbose_name="fractal"
-    )  # Фрактал
-    palette = models.ForeignKey(
-        "Palette", related_name="drawables",
-        on_delete=models.CASCADE, verbose_name="palette"
-    )  # Палитра
+    dimension = models.ForeignKey(
+        "Dimension", related_name="fractals",
+        on_delete=models.CASCADE, verbose_name="dimension"
+    )  # Измерение
+    x = models.FloatField()  # Коардинаты
+    y = models.FloatField()  # т.е v=x+y*1j
     created = models.DateTimeField(auto_now_add=True)
     file_id = models.TextField(max_length=40, null=True)
     image_url = models.URLField(null=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="fractals",
+        on_delete=models.CASCADE, verbose_name="user",
+        blank=True, null=True
+    )
 
 
-class DrawableCalculateTask(models.Model):
-    drawable = models.ForeignKey(
-        "Drawable", related_name="drawablecalculatetasks",
-        on_delete=models.CASCADE, verbose_name="drawable"
+class FractalCalculateTask(models.Model):
+    fractal = models.ForeignKey(
+        "Fractal", related_name="fractalcalculatetasks",
+        on_delete=models.CASCADE, verbose_name="fractal"
     )
     addTime = models.DateTimeField("addTime", auto_now_add=True)
     startTime = models.DateTimeField("startTime", null=True)
     endTime = models.DateTimeField("endTime", null=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="fractalcalculatetasks",
+        on_delete=models.CASCADE, verbose_name="user"
+    )

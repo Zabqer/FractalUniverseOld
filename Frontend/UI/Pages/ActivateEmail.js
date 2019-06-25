@@ -20,8 +20,9 @@ export default class ActivateEmail extends PermissionRequired {
     let result = await window.FU.activateEmail(user, hash);
     if (result && result.success) {
       this.setState({ success: true });
+      window.update();
     } else {
-      this.setState({ success: false });
+      this.setState({ success: false, error: result.detail });
     }
   }
   render() {
@@ -44,6 +45,8 @@ export default class ActivateEmail extends PermissionRequired {
             <Fragment>
               <div>
                 { gettext("Oups.. Error occurred. Maybe link is invalid?") }
+                <br/>
+                { gettext("Error: ") } { this.state.error }
               </div>
             </Fragment>
           ) }

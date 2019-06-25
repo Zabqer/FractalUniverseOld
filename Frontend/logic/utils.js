@@ -65,3 +65,69 @@ export function hsv2rgb(h, s, v) {
   }
   return Math.floor(((r * 255) << 16) + ((g * 255) << 8) + b * 255);
 }
+
+export function elementOffset(el) {
+    var rect = el.getBoundingClientRect(),
+    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    return { top: rect.top + scrollTop, left: rect.left + scrollLeft, width: rect.width, height: rect.height }
+}
+
+let iid = 0;
+
+export async function generateImage(url, palette) {
+  return new Promise((resolve) => {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "blob";
+    xhr.onload = function() {
+      var fr = new FileReader();
+      fr.onload = function() {
+        let img = new Image();
+        img.src = this.result;
+        let canvas = document.createElement("canvas");
+        img.onload = () => {
+          canvas.width = img.width
+          canvas.height = img.height
+          let ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          let image = ctx.getImageData(0, 0, img.width, img.height);
+          let data = image.data;
+          let replaceMap = {}
+          for (let i = 0; i < data.length; i += 4) {
+            let color = data[i] + (data[i + 1] << 8) + (data[i + 2] << 16);
+            if (!replaceMap[color]) {
+              replaceMap[color] = true
+            }
+          }
+          let gradations = Object.keys(replaceMap);
+          let gl = gradations.length;
+          let paletteGradations = generatePalette(palette.colors, palette.gradations);
+          let colorCount = gl / paletteGradations.length;
+          let i = 0;
+          gradations.sort((a, b) => a - b).forEach((color) => {
+            replaceMap[color] = paletteGradations[Math.floor(i++ / colorCount)]
+          });
+          // console.log(replaceMap)
+          for (let i = 0; i < data.length; i += 4) {
+            let color = data[i] + (data[i + 1] << 8) + (data[i + 2] << 16);
+            let newColor = replaceMap[color];
+            data[i] = (newColor >> 16) & 0xFF;
+            data[i + 1] = (newColor >> 8) & 0xFF;
+            data[i + 2] = newColor & 0xFF;
+          }
+          resolve(image);
+        }
+      };
+      fr.readAsDataURL(xhr.response);
+    };
+    xhr.send();
+  });
+  // let data = new Uint8ClampedArray(await response.arrayBuffer());
+  // let image = new ImageData(data, 200)
+  // return image;
+  // return new Promise((resolve) => {
+  //     // let fractalImage = ctx.getImageData(0, 0, image.width, image.height);
+  //     // resolve(fractalImage);
+  // });
+}
