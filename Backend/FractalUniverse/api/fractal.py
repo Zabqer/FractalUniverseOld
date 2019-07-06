@@ -10,9 +10,9 @@ from rest_framework.status import (
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from ..models import Palette, Fractal, Dimension
-from ..utils import info, search_view, task_manager
+from ..utils import info, task_manager
 from django.core.exceptions import ObjectDoesNotExist
-from ..utils.api_view import APIViewWithPermissions, with_permissions
+from ..utils.api_view import APIViewWithPermissions, with_permissions, APIViewSearch
 from ..utils.permissions import IsPremium
 
 
@@ -21,27 +21,34 @@ class PostSerializer(serializers.Serializer):
     y = serializers.FloatField(required=True)
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def search(request, dimension):
-    try:
-        dimension = Dimension.objects.get(id=dimension)
-    except ObjectDoesNotExist:
-        return Response({
-            "detail": _("Dimension not found.")
-        }, status=HTTP_404_NOT_FOUND)
+class SearchView(APIViewSearch):
 
-    def searchf(objects, keywords):
+    scope = "fractal-search"
+
+    model = Fractal
+    serializer = (info.fractal,)
+
+    def prepare(self, dimension=None):
+        try:
+            return {
+                "dimension": Dimension.objects.get(id=dimension)
+            }
+        except ObjectDoesNotExist:
+            return Response({
+                "detail": _("Dimension not found.")
+            }, status=HTTP_404_NOT_FOUND)
+
+    @with_permissions((AllowAny,))
+    def search(self, objects, keywords, dimension):
         if not keywords:
             return objects.filter(dimension=dimension).exclude(id=dimension.map.id)
         else:
             return objects.filter(dimension=dimension, name__icontains=keywords).exclude(id=dimension.map.id)
 
-    return search_view.search(Fractal, request, searchf, info.fractal)
-
 
 class View(APIViewWithPermissions):
+
+    scope = "fractal"
 
     @with_permissions((IsPremium,))
     def post(self, request, dimension=None):

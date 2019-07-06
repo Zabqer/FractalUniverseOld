@@ -11,9 +11,9 @@ from rest_framework.status import (
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from ..models import Palette
-from ..utils import info, search_view
+from ..utils import info
 from django.core.exceptions import ObjectDoesNotExist
-from ..utils.api_view import APIViewWithPermissions, with_permissions
+from ..utils.api_view import APIViewWithPermissions, with_permissions, CaptchaValidator, APIViewSearch
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from ..utils.permissions import IsPremium
 
@@ -28,33 +28,45 @@ class PostSerializer(serializers.Serializer):
     glob = serializers.BooleanField(default=False)
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((AllowAny,))
-def search(request):
-    return search_view.search(Palette, request, search_view.default_searchf, info.palette)
+class SearchView(APIViewSearch):
+
+    scope = "palette-search"
+
+    model = Palette
+    serializer = (info.palette,)
+
+    @with_permissions((AllowAny,))
+    def search(self, objects, keywords):
+        return super().search(objects, keywords)
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def user_search(request):
-    def searchf(objects, keywords):
+class UserSearchView(APIViewSearch):
+
+    scope = "user-palette-search"
+
+    model = Palette
+    serializer = (info.palette,)
+
+    @with_permissions((IsAuthenticated,))
+    def search(self, objects, keywords):
         if not keywords:
-            return objects.filter(user=request.user)
+            return objects.filter(user=self.request.user)
         else:
-            return objects.filter(user=request.user, name__icontains=keywords)
-    return search_view.search(Palette, request, searchf, info.palette)
+            return objects.filter(user=self.request.user, name__icontains=keywords)
 
 
-@csrf_exempt
-@api_view(["GET"])
-@permission_classes((AllowAny,))
-def default(request):
-    return Response(info.palette(Palette.objects.first()), status=HTTP_200_OK);
+class DefaultView(APIViewWithPermissions):
+
+    scope = "palette-default"
+
+    @with_permissions((AllowAny,))
+    def get(self, request, palette=None):
+        return Response(info.palette(Palette.objects.first()), status=HTTP_200_OK);
 
 
 class View(APIViewWithPermissions):
+
+    scope = "palette"
 
     @with_permissions((AllowAny,))
     def get(self, request, palette=None):

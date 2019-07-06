@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -11,10 +11,11 @@ from rest_framework.status import (
 )
 from ..models import User, AuthToken, EmailVerificationToken
 from django.utils.translation import gettext as _
-from ..utils import info, email_sender, search_view
+from ..utils import info, email_sender
 from rest_framework import serializers
 from django.db.models import Q
-from ..utils.api_view import APIViewWithPermissions, with_permissions, CaptchaValidator
+from rest_framework.throttling import ScopedRateThrottle
+from ..utils.api_view import APIViewWithPermissions, with_permissions, CaptchaValidator, APIViewSearch
 
 
 class DeleteSerializer(serializers.Serializer):
@@ -26,16 +27,19 @@ class ActivateSerializer(serializers.Serializer, CaptchaValidator):
     hash = serializers.CharField(required=True)
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((IsAdminUser,))
-def search(request):
-    def searchf(objects, keywords):
+class SearchView(APIViewSearch):
+
+    scope = "user-search"
+
+    model = User
+    serializer = (info.user, True)
+
+    @with_permissions((IsAdminUser,))
+    def search(self, objects, keywords):
         if not keywords:
             return objects.all()
         else:
             return objects.filter(Q(login__icontains=keywords) | Q(email__icontains=keywords))
-    return search_view.search(User, request, searchf, info.user, True)
 
 
 class RegisterSerializer(serializers.Serializer, CaptchaValidator):
@@ -45,6 +49,8 @@ class RegisterSerializer(serializers.Serializer, CaptchaValidator):
 
 
 class View(APIViewWithPermissions):
+
+    scope = "user"
 
     @with_permissions((IsAuthenticated,))
     def get(self, request):
@@ -84,34 +90,37 @@ class View(APIViewWithPermissions):
         request.user.delete()
         return Response(None, status=HTTP_204_NO_CONTENT)
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((AllowAny,))
-def activate(request):
-    serializer = ActivateSerializer(data=request.data, context={"request": request})
-    serializer.is_valid(raise_exception=True)
-    user = serializer.data["user"]
-    try:
-        user = User.objects.get(id=user)
-    except User.DoesNotExist:
-        return Response({
-            "user": _("User not found.")
-        }, status=HTTP_404_NOT_FOUND)
-    hash = serializer.data["hash"]
-    try:
-        email_token = EmailVerificationToken.objects.filter(user=user, key=hash)
+
+class ActivateView(APIViewWithPermissions):
+
+    scope = "user-activate"
+
+    @permission_classes((AllowAny,))
+    def post(self, request):
+        serializer = ActivateSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.data["user"]
+        try:
+            user = User.objects.get(id=user)
+        except User.DoesNotExist:
+            return Response({
+                "user": _("User not found.")
+            }, status=HTTP_404_NOT_FOUND)
+        hash = serializer.data["hash"]
+        try:
+            email_token = EmailVerificationToken.objects.filter(user=user, key=hash)
+            email_token.delete()
+        except EmailVerificationToken.DoesNotExist:
+            return Response({
+                "hash": _("Invalid hash.")
+            }, status=HTTP_400_BAD_REQUEST)
+        user.is_active = True
+        user.save()
         email_token.delete()
-    except EmailVerificationToken.DoesNotExist:
+        token = AuthToken.objects.create(user=user, remember=True)
+        token.save()
         return Response({
-            "hash": _("Invalid hash.")
-        }, status=HTTP_400_BAD_REQUEST)
-    user.is_active = True
-    user.save()
-    email_token.delete()
-    token = AuthToken.objects.create(user=user, remember=True)
-    token.save()
-    return Response({
-        "token": token.key,
-        "expire_at": token.expire_at,
-        "user": info.user(user, True)
-    }, status=HTTP_200_OK)
+            "token": token.key,
+            "expire_at": token.expire_at,
+            "user": info.user(user, True)
+        }, status=HTTP_200_OK)

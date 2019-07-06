@@ -9,23 +9,36 @@ from rest_framework.status import (
 )
 from ..models import FractalCalculateTask
 from django.utils.translation import gettext as _
-from ..utils import info, search_view
+from ..utils import info
+from ..utils.api_view import APIViewWithPermissions, with_permissions, CaptchaValidator, APIViewSearch
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def search(request):
-    return search_view.search(FractalCalculateTask, request, search_view.default_searchf, info.task, name="tasks")
+class SearchView(APIViewSearch):
+
+    scope = "task-search"
+
+    model = FractalCalculateTask
+    serializer = (info.task,)
+
+    name = "tasks"
+
+    @with_permissions((IsAuthenticated,))
+    def search(self, objects, keywords):
+        return super().search(objects, keywords)
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def user_search(request):
-    def searchf(objects, keywords):
+class UserSearchView(APIViewSearch):
+
+    scope = "user-task-search"
+
+    model = FractalCalculateTask
+    serializer = (info.task,)
+
+    name = "tasks"
+
+    @with_permissions((IsAuthenticated,))
+    def search(self, objects, keywords):
         if not keywords:
-            return objects.filter(user=request.user)
+            return objects.filter(user=self.request.user)
         else:
-            return objects.filter(user=request.user, name__icontains=keywords)
-    return search_view.search(FractalCalculateTask, request, searchf, info.task, name="tasks")
+            return objects.filter(user=self.request.user, name__icontains=keywords)

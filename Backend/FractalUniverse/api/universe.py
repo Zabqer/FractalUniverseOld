@@ -13,8 +13,8 @@ from ..models import Universe
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
-from ..utils import info, search_view
-from ..utils.api_view import APIViewWithPermissions, with_permissions
+from ..utils import info
+from ..utils.api_view import APIViewWithPermissions, with_permissions, APIViewSearch
 from rest_framework.permissions import AllowAny, IsAdminUser
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -24,14 +24,21 @@ class PostSerializer(serializers.Serializer):
     function = serializers.CharField(required=True)
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def search(request):
-    return search_view.search(Universe, request, search_view.default_searchf, info.universe)
+class SearchView(APIViewSearch):
+
+    scope = "universe-search"
+
+    model = Universe
+    serializer = (info.universe,)
+
+    @with_permissions((IsAuthenticated,))
+    def search(self, objects, keywords):
+        return super().search(objects, keywords)
 
 
 class View(APIViewWithPermissions):
+
+    scope = "universe"
 
     @with_permissions((AllowAny,))
     def get(self, request, universe=None):

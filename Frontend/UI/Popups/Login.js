@@ -38,9 +38,25 @@ export default class LoginPopup extends Component {
               <Input placeholder="Логин" type="text" name="login" autoComplete="login" parent={this} />
               <Input placeholder="Пароль" type="password" name="password" autoComplete="password" parent={this} />
               <Checkbox label="Запомнить меня" name="rememberMe" parent={this} />
-              <Button onClick={(event) => {
+              <Button onClick={async (event) => {
                 event.preventDefault();
-                this.setState({ stage: "captcha" });
+                // this.setState({ stage: "captcha" });
+                try {
+                  await window.FU.login(this.state.login, this.state.password, this.state.rememberMe, "");
+                  window.hidePopup();
+                } catch (e) {
+                  console.log(e)
+                  if (e.login) {
+                    this.setState({ loginError: e.login });
+                  }
+                  if (e.password) {
+                    this.setState({ passwordError: e.password });
+                  }
+                  if (e.detail) {
+                    window.showError(e.detail);
+                  }
+                  this.setState({ stage: "form" });
+                }
               }}>
                 Войти
               </Button>

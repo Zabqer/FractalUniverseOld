@@ -34,9 +34,24 @@ export default class Register extends Component {
                 <Input name="login" type="login" placeholder={gettext("Username")} parent={this} />
                 <Input name="email" type="email" placeholder={gettext("Email")} parent={this} />
                 <Input name="password" type="password" placeholder={gettext("Password")} parent={this} />
-                <Button onClick={(event) => {
+                <Button onClick={async (event) => {
                   event.preventDefault();
-                  this.setState({ stage: "captcha" });
+                  try {
+                    let result = await window.FU.register(this.state.login, this.state.email, this.state.password, "");
+                    this.setState({ stage: "email" });
+                  } catch (e) {
+                    if (e.login) {
+                      this.setState({ loginError: e.login });
+                    }
+                    if (e.email) {
+                      this.setState({ loginError: e.email });
+                    }
+                    if (e.password) {
+                      this.setState({ passwordError: e.password });
+                    }
+                    this.setState({ stage: "form" });
+                  }
+                  // this.setState({ stage: "captcha" });
                 }}> { gettext("Go") } </Button>
               </Fragment>
             ) : null }
@@ -46,18 +61,18 @@ export default class Register extends Component {
                   sitekey="6Ld_dZYUAAAAADYclvtGmWVBCZmNFr0sLLLgs61m"
                   render="explicit"
                   verifyCallback={async (captcha) => {
-                    let result = await window.FU.register(this.state.login, this.state.email, this.state.password, captcha);
-                    if (result && result.success) {
+                    try {
+                      let result = await window.FU.register(this.state.login, this.state.email, this.state.password, captcha);
                       this.setState({ stage: "email" });
-                    } else {
-                      if (result.login) {
-                        this.setState({ loginError: result.login });
+                    } catch (e) {
+                      if (e.login) {
+                        this.setState({ loginError: e.login });
                       }
-                      if (result.email) {
-                        this.setState({ loginError: result.email });
+                      if (e.email) {
+                        this.setState({ loginError: e.email });
                       }
-                      if (result.password) {
-                        this.setState({ passwordError: result.password });
+                      if (e.password) {
+                        this.setState({ passwordError: e.password });
                       }
                       this.setState({ stage: "form" });
                     }

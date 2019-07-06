@@ -11,9 +11,9 @@ from rest_framework.status import (
 from ..models import Dimension, Universe, Fractal
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-from ..utils import info, search_view, task_manager
+from ..utils import info, task_manager
 from django.core.exceptions import ObjectDoesNotExist
-from ..utils.api_view import APIViewWithPermissions, with_permissions
+from ..utils.api_view import APIViewWithPermissions, with_permissions, APIViewSearch
 from rest_framework.exceptions import MethodNotAllowed
 
 
@@ -22,33 +22,41 @@ class PostSerializer(serializers.Serializer):
     parameter = serializers.CharField(required=True)
 
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes((AllowAny,))
-def search(request, universe=None):
-    if universe:
-        try:
-            universe = Universe.objects.get(id=universe)
-        except ObjectDoesNotExist:
-            return Response({
-                "detail": _("Universe not found.")
-            }, status=HTTP_404_NOT_FOUND)
+class SearchView(APIViewSearch):
 
-    def searchf(objects, keywords):
-            if not keywords:
-                if universe:
-                    return objects.filter(universe=universe)
-                else:
-                    return objects.all()
+    scope = "dimension-search"
+
+    model = Dimension
+    serializer = (info.dimension,)
+
+    def prepare(self, universe=None):
+        if universe:
+            try:
+                return {
+                    "universe": Universe.objects.get(id=universe)
+                }
+            except ObjectDoesNotExist:
+                return Response({
+                    "detail": _("Universe not found.")
+                }, status=HTTP_404_NOT_FOUND)
+
+    @with_permissions((AllowAny,))
+    def search(self, objects, keywords, universe=None):
+        if not keywords:
+            if universe:
+                return objects.filter(universe=universe)
             else:
-                if universe:
-                    return objects.filter(universe=universe, name__icontains=keywords)
-                else:
-                    return objects.filter(name__icontains=keywords)
-    return search_view.search(Dimension, request, searchf, info.dimension)
+                return objects.all()
+        else:
+            if universe:
+                return objects.filter(universe=universe, name__icontains=keywords)
+            else:
+                return objects.filter(name__icontains=keywords)
 
 
 class View(APIViewWithPermissions):
+
+    scope = "dimension"
 
     @with_permissions((AllowAny,))
     def get(self, request, dimension=None, universe=None):

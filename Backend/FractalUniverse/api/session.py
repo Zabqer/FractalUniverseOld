@@ -22,6 +22,8 @@ class LoginSerializer(serializers.Serializer, CaptchaValidator):
 
 class View(APIViewWithPermissions):
 
+    scope = "session"
+
     @with_permissions((AllowAny,))
     def post(self, request):
         serializer = LoginSerializer(data=request.data, context={"request": request})

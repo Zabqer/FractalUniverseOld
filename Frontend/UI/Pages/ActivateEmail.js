@@ -17,12 +17,12 @@ export default class ActivateEmail extends PermissionRequired {
   async go() {
     let user = this.props.match.params.user;
     let hash = this.props.match.params.hash;
-    let result = await window.FU.activateEmail(user, hash);
-    if (result && result.success) {
+    try {
+      let result = await window.FU.activateEmail(user, hash);
       this.setState({ success: true });
       window.update();
-    } else {
-      this.setState({ success: false, error: result.detail });
+    } catch (e) {
+      this.setState({ success: false, error: e.detail });
     }
   }
   render() {

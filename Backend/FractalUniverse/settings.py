@@ -36,7 +36,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    'django.middleware.locale.LocaleMiddleware',
+    "django.middleware.locale.LocaleMiddleware",
     # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -59,7 +59,36 @@ REST_FRAMEWORK = {
         "FractalUniverse.auth.ExpirableTokenAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated", )
+        "rest_framework.permissions.IsAuthenticated", ),
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.ScopedRateThrottle", ),
+    "DEFAULT_THROTTLE_RATES": {
+        "session.post": "6/minute",
+        "session.delete": "1/second",
+        "user.get": "1/second",
+        "user.post": "2/hour",
+        "user.delete": "1/second",
+        "user-activate.post": "1/second",
+        "user-search.post": "1/second",
+        "universe.post": "1/second",
+        "universe.get": "1/second",
+        "universe.delete": "1/second",
+        "universe-search.post": "1/second",
+        "dimension.get": "1/second",
+        "dimension.post": "1/second",
+        "dimension.delete": "1/second",
+        "dimension-search.post": "1/second",
+        "fractal.post": "2/hour",
+        "fractal-search.post": "1/second",
+        "task-search.post": "1/second",
+        "user-task-search.post": "1/second",
+        "palette.get": "1/second",
+        "palette.post": "1/second",
+        "palette.delete": "1/second",
+        "palette-search.post": "1/second",
+        "palette-default.get": "1/second",
+        "user-palette-search.post": "1/second"
+    }
 }
 
 ROOT_URLCONF = "FractalUniverse.urls"
