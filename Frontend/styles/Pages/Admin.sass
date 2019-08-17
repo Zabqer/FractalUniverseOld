@@ -5,16 +5,22 @@
     margin-bottom: 10px
   .universes-paginator, .dimensions-paginator, .fractals-paginator
     .results
-      grid-template-columns: auto 1fr 1fr auto
+      grid-template-columns: auto auto 1fr 1fr auto
   .palettes-paginator
     .results
       grid-template-columns: auto 1fr 1fr 1fr auto
   .users-paginator
     .results
-      grid-template-columns: auto 1fr 1fr auto auto
+      grid-template-columns: auto 1fr 1fr auto auto auto
   .tasks-paginator
     .results
       grid-template-columns: auto 1fr 1fr
+  .sessions-paginator
+    .results
+      grid-template-columns: auto auto 1fr auto 1fr auto
+      .row
+        .current
+          background-color: #EEEEEE
 
 
 .edit-universe-popup

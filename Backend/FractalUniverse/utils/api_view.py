@@ -80,10 +80,14 @@ class APIViewSearch(APIViewWithPermissions):
             plural_name = self.name
         except AttributeError:
             plural_name = str(self.model._meta.verbose_name_plural)
+        try:
+            order = self.order
+        except AttributeError:
+            order = None
         serializer = SearchSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         keywords = serializer.data["keywords"]
-        universes = self.search(self.model.objects, len(keywords) != 0 and keywords, **params).order_by("-id")
+        universes = self.search(self.model.objects, len(keywords) != 0 and keywords, **params).order_by("-" + order if order else "-id")
         paginator = Paginator(universes, settings.PAGINATOR_PAGES)
         try:
             page = paginator.page(serializer.data["page"])
@@ -93,7 +97,7 @@ class APIViewSearch(APIViewWithPermissions):
             }, status=HTTP_404_NOT_FOUND)
         response = []
         for obj in page.object_list:
-            response.append(self.serializer[0](obj, *self.serializer[1:]))
+            response.append(self.serializer[0](obj, request, *self.serializer[1:]))
         return Response({
             "maxPages": paginator.num_pages,
             plural_name: response

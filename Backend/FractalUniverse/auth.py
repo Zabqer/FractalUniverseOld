@@ -8,13 +8,17 @@ class ExpirableTokenAuthentication(TokenAuthentication):
     model = AuthToken
     def authenticate_credentials(self, key):
         try:
-            token = AuthToken.objects.get(key = key)
+            token = AuthToken.objects.get(key=key)
         except AuthToken.DoesNotExist:
             raise AuthenticationFailed("Invalid Token")
         if token.expire_at <= timezone.now():
-            token.delete()
+            token.key = None
+            token.expire_at = None
+            token.save()
             raise AuthenticationFailed("Token expire")
         if not token.user.is_active:
             raise AuthenticationFailed("User is not active")
+        if token.user.is_blocked:
+            raise AuthenticationFailed("User blocked")
         token.save()
         return token.user, token

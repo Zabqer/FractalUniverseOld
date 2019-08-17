@@ -31,7 +31,7 @@ export default class AsyncContentProvider extends Component {
       <div className="loadable">
         <ReactCSSTransitionGroup transitionName="loadable" transitionEnterTimeout={300} transitionLeaveTimeout={150}>
           { !this.state.loaded ? <Loader big={true}/> : null }
-          { this.state.loaded ? <div> { this.props.children } </div> : null }
+          { this.state.loaded ? <div className={this.props.className}> { this.props.children } </div> : null }
         </ReactCSSTransitionGroup>
       </div>
     )

@@ -16,6 +16,12 @@ from rest_framework import serializers
 from django.db.models import Q
 from rest_framework.throttling import ScopedRateThrottle
 from ..utils.api_view import APIViewWithPermissions, with_permissions, CaptchaValidator, APIViewSearch
+from rest_framework.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist
+
+
+class EditSerializer(serializers.Serializer):
+    blocked = serializers.BooleanField(required=False)
 
 
 class DeleteSerializer(serializers.Serializer):
@@ -23,8 +29,8 @@ class DeleteSerializer(serializers.Serializer):
 
 
 class ActivateSerializer(serializers.Serializer, CaptchaValidator):
-    user = serializers.IntegerField(required=True)
-    hash = serializers.CharField(required=True)
+    hash = serializers.CharField(required=False)
+
 
 
 class SearchView(APIViewSearch):
@@ -80,6 +86,27 @@ class View(APIViewWithPermissions):
         return Response(None, status=HTTP_204_NO_CONTENT)
 
     @with_permissions((IsAuthenticated,))
+    def put(self, request, user=None):
+        if user and user != request.user.id:
+            if not request.user.is_staff:
+                raise PermissionDenied()
+            try:
+                user = User.objects.get(id=user)
+            except ObjectDoesNotExist:
+                return Response({
+                    "detail": _("User not found.")
+                }, status=HTTP_404_NOT_FOUND)
+        else:
+            user = request.user
+        serializer = EditSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.data
+        if "blocked" in data and request.user.id != user.id:
+            user.is_blocked = data["blocked"]
+        user.save()
+        return Response(None, status=HTTP_204_NO_CONTENT)
+
+    @with_permissions((IsAuthenticated,))
     def delete(self, request):
         serializer = DeleteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -95,32 +122,43 @@ class ActivateView(APIViewWithPermissions):
 
     scope = "user-activate"
 
-    @permission_classes((AllowAny,))
-    def post(self, request):
-        serializer = ActivateSerializer(data=request.data, context={"request": request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.data["user"]
+    @with_permissions((AllowAny,))
+    def post(self, request, user):
         try:
             user = User.objects.get(id=user)
         except User.DoesNotExist:
             return Response({
-                "user": _("User not found.")
+                "detail": _("User not found.")
             }, status=HTTP_404_NOT_FOUND)
-        hash = serializer.data["hash"]
-        try:
-            email_token = EmailVerificationToken.objects.filter(user=user, key=hash)
+        serializer = ActivateSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        hash = "hash" in serializer.data and serializer.data["hash"]
+        if not hash:
+            if not request.user or not request.user.is_staff:
+                raise PermissionDenied()
+            email_token = EmailVerificationToken.objects.filter(user=user)
+            if not email_token.exists():
+                return Response({
+                    "detail": _("User arleady activated.")
+                }, status=HTTP_400_BAD_REQUEST)
+            user.is_active = True
+            user.save()
             email_token.delete()
-        except EmailVerificationToken.DoesNotExist:
+            return Response(None, status=HTTP_204_NO_CONTENT)
+        else:
+            try:
+                email_token = EmailVerificationToken.objects.filter(user=user, key=hash)
+            except EmailVerificationToken.DoesNotExist:
+                return Response({
+                    "hash": _("Invalid hash.")
+                }, status=HTTP_400_BAD_REQUEST)
+            user.is_active = True
+            user.save()
+            email_token.delete()
+            token = AuthToken.objects.create(user=user, remember=True)
+            token.save()
             return Response({
-                "hash": _("Invalid hash.")
-            }, status=HTTP_400_BAD_REQUEST)
-        user.is_active = True
-        user.save()
-        email_token.delete()
-        token = AuthToken.objects.create(user=user, remember=True)
-        token.save()
-        return Response({
-            "token": token.key,
-            "expire_at": token.expire_at,
-            "user": info.user(user, True)
-        }, status=HTTP_200_OK)
+                "token": token.key,
+                "expire_at": token.expire_at,
+                "user": info.user(user, True)
+            }, status=HTTP_200_OK)

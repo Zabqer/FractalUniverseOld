@@ -36,6 +36,9 @@ export default {
     },
     setDimension(dimension) {
       cache.dimensions[dimension.id] = dimension;
+      if (!dimension.fractals) {
+        dimension.fractals = {}
+      }
       if (cache.universes[dimension.universe]) {
         cache.universes[dimension.universe].dimensions[dimension.id] = dimension;
         dimension.universe = cache.universes[dimension.universe];
@@ -50,6 +53,10 @@ export default {
     },
     setFractal(fractal) {
       cache.fractals[fractal.id] = fractal;
+      if (cache.dimensions[fractal.dimension]) {
+        cache.dimensions[fractal.dimension].fractals[fractal.id] = fractal;
+        fractal.dimension = cache.dimensions[fractal.dimension];
+      }
     },
     getPalette(id) {
       return cache.palettes[id];
@@ -122,26 +129,26 @@ export default {
           this.loggedAs = user;
           console.log("[FractalUniverse] logged as", this.loggedAs);
         }
-        let paletteId = localStorage.getItem("palette");
-        if (paletteId == null) {
-          this.palette = await this.getDefaultPalette();
-          localStorage.setItem("palette", this.palette.id)
-        } else {
-          try {
-            this.palette= await this.getPalette(paletteId);
-          } catch (e) {
-            if (e.status == 404) {
-              this.palette = await this.getDefaultPalette();
-              localStorage.setItem("palette", this.palette.id)
-            }
-          }
-        }
       } catch (e) {
         if (e.status == 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("expire_at");
           this.token = null;
           this.expireAt = null;
+        }
+      }
+    }
+    let paletteId = localStorage.getItem("palette");
+    if (paletteId == null) {
+      this.palette = await this.getDefaultPalette();
+      localStorage.setItem("palette", this.palette.id)
+    } else {
+      try {
+        this.palette = await this.getPalette(paletteId);
+      } catch (e) {
+        if (e.status == 404) {
+          this.palette = await this.getDefaultPalette();
+          localStorage.setItem("palette", this.palette.id)
         }
       }
     }
@@ -178,23 +185,40 @@ export default {
     });
     return data;
   },
-  async activateEmail(user, hash) {
+  async activateUser(user, hash) {
     console.log("[FractalUniverse] activateEmail", arguments);
-    if (this.loggedAs) {
+    if (hash && this.loggedAs) {
       console.error("[FractalUniverse] arleady logged in");
       return false;
     }
-    let data = await this.api("user/activate", "POST", {
-      user,
+    let data = await this.api(`user/${user}/activate`, "POST", {
       hash
     });
-    if (data.token) {
+    if (hash && data.token) {
       this.token = data.token;
       this.loggedAs = data.user;
       console.log("[FractalUniverse] logged as", this.loggedAs);
       localStorage.setItem("token", this.token);
     }
     return data;
+  },
+  async editUser(id, options) {
+    console.log("[FractalUniverse] editUser", arguments);
+    let result = await this.api(`user/${id}`, "PUT", options);
+    return result;
+  },
+  async searchSessions(keywords, page, isUser) {
+    console.log("[FractalUniverse] searchSessions", arguments);
+    let result = await this.api(isUser ? "user/session/search" : "session/search", "POST", {
+      keywords,
+      page
+    });
+    return result;
+  },
+  async deleteSession(id, user) {
+    console.log("[FractalUniverse] deleteSession", arguments);
+    let result = await this.api(user ? `user/${user}/session/${id}` : `session/${id}`, "DELETE");
+    return result;
   },
   async logout() {
     console.log("[FractalUniverse] logout", arguments);
@@ -261,6 +285,14 @@ export default {
     }
     return result;
   },
+  async editUniverse(id, options) {
+    console.log("[FractalUniverse] editUniverse", arguments);
+    let result = await this.api(`universe/${id}`, "PUT", options);
+    if (result) {
+      this.cache.setUniverse(result);
+    }
+    return result;
+  },
   async deleteUniverse(id) {
     console.log("[FractalUniverse] deleteUniverse", arguments);
     let result = await this.api(`universe/${id}`, "DELETE");
@@ -320,6 +352,14 @@ export default {
     }
     return result;
   },
+  async editDimension(id, options) {
+    console.log("[FractalUniverse] editDimension", arguments);
+    let result = await this.api(`dimension/${id}`, "PUT", options);
+    if (result) {
+      this.cache.setDimension(result);
+    }
+    return result;
+  },
   async deleteDimension(id) {
     console.log("[FractalUniverse] deleteDimension", arguments);
     let result = await this.api(`dimension/${id}`, "DELETE");
@@ -352,6 +392,14 @@ export default {
       result.fractals.forEach((dimension) => {
         this.cache.setFractal(dimension);
       });
+    }
+    return result;
+  },
+  async editFractal(id, options) {
+    console.log("[FractalUniverse] editFractal", arguments);
+    let result = await this.api(`fractal/${id}`, "PUT", options);
+    if (result) {
+      this.cache.setFractal(result);
     }
     return result;
   },

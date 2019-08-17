@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Button from "../Elements/Button";
 import Paginator from "../Elements/Paginator";
 import Fractal from "../Elements/Fractal";
-import AsyncContentProvider from "../AsyncContentProvider"
+import AsyncContentProvider from "../AsyncContentProvider";
 import AddFractalPopup from "../Popups/AddFractalPopup";
 
 import AddIcon from "../Icons/Add";
@@ -44,9 +44,9 @@ export default class Dimension extends Component {
             )
           }} row={(fractal, search) => {
             return (
-              <Fragment>
+              <Link to={`/fractal/${fractal.id}`}>
                 <Fractal fractal={fractal} />
-              </Fragment>
+              </Link>
             )
           }}/>
         </AsyncContentProvider>

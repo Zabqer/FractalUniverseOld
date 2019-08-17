@@ -17,6 +17,10 @@ from ..utils.api_view import APIViewWithPermissions, with_permissions, APIViewSe
 from rest_framework.exceptions import MethodNotAllowed
 
 
+class EditSerializer(serializers.Serializer):
+    active = serializers.BooleanField(required=False)
+
+
 class PostSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     parameter = serializers.CharField(required=True)
@@ -111,6 +115,22 @@ class View(APIViewWithPermissions):
         )
         dimension.save()
         task_manager.calculate(dimension.map, request.user)
+        return Response(info.dimension(dimension), status=HTTP_200_OK)
+
+    @with_permissions((IsAdminUser,))
+    def put(self, request, dimension):
+        try:
+            dimension = Dimension.objects.get(id=dimension)
+        except ObjectDoesNotExist:
+            return Response({
+                "detail": _("Dimension not found.")
+            }, status=HTTP_404_NOT_FOUND)
+        serializer = EditSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.data
+        if "active" in data:
+            dimension.is_active = data["active"]
+        dimension.save()
         return Response(info.dimension(dimension), status=HTTP_200_OK)
 
     @with_permissions((IsAdminUser,))

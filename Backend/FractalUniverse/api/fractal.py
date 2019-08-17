@@ -14,7 +14,10 @@ from ..utils import info, task_manager
 from django.core.exceptions import ObjectDoesNotExist
 from ..utils.api_view import APIViewWithPermissions, with_permissions, APIViewSearch
 from ..utils.permissions import IsPremium
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 
+class EditSerializer(serializers.Serializer):
+    active = serializers.BooleanField(required=False)
 
 class PostSerializer(serializers.Serializer):
     x = serializers.FloatField(required=True)
@@ -52,6 +55,8 @@ class View(APIViewWithPermissions):
 
     @with_permissions((IsPremium,))
     def post(self, request, dimension=None):
+        if not dimension:
+            raise MethodNotAllowed("POST")
         serializer = PostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
@@ -73,6 +78,38 @@ class View(APIViewWithPermissions):
             user=request.user
         )
         task_manager.calculate(fractal, request.user)
+        return Response(info.fractal(fractal), status=HTTP_200_OK)
+
+    @with_permissions((AllowAny,))
+    def get(self, request, fractal=None):
+        if not fractal:
+            raise MethodNotAllowed("GET")
+        try:
+            fractal = Fractal.objects.get(id=fractal)
+        except ObjectDoesNotExist:
+            return Response({
+                "detail": _("Fractal not found.")
+            }, status=HTTP_404_NOT_FOUND)
+        return Response(info.fractal(fractal), status=HTTP_200_OK)
+
+    @with_permissions((IsPremium,))
+    def put(self, request, fractal):
+        if not fractal:
+            raise MethodNotAllowed("PUT")
+        try:
+            fractal = Fractal.objects.get(id=fractal)
+        except ObjectDoesNotExist:
+            return Response({
+                "detail": _("Fractal not found.")
+            }, status=HTTP_404_NOT_FOUND)
+        if fractal.user.id != request.user.id and not request.user.is_staff:
+            raise PermissionDenied()
+        serializer = EditSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.data
+        if "active" in data:
+            fractal.is_active = data["active"]
+        fractal.save()
         return Response(info.fractal(fractal), status=HTTP_200_OK)
 
 

@@ -19,6 +19,10 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from django.core.exceptions import ObjectDoesNotExist
 
 
+class EditSerializer(serializers.Serializer):
+    active = serializers.BooleanField(required=False)
+
+
 class PostSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     function = serializers.CharField(required=True)
@@ -66,6 +70,22 @@ class View(APIViewWithPermissions):
                 "detail": _("Universe arleady exists.")
             }, status=HTTP_400_BAD_REQUEST)
         universe = Universe.objects.create(function=function, name=name, initial_value=initial)
+        universe.save()
+        return Response(info.universe(universe), status=HTTP_200_OK)
+
+    @with_permissions((IsAdminUser,))
+    def put(self, request, universe):
+        try:
+            universe = Universe.objects.get(id=universe)
+        except ObjectDoesNotExist:
+            return Response({
+                "detail": _("Universe not found.")
+            }, status=HTTP_404_NOT_FOUND)
+        serializer = EditSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.data
+        if "active" in data:
+            universe.is_active = data["active"]
         universe.save()
         return Response(info.universe(universe), status=HTTP_200_OK)
 

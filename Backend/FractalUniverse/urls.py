@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, re_path
-from FractalUniverse.api import session, user, universe, dimension, fractal, task, palette
+from FractalUniverse.api import session, user, universe, dimension, fractal, comment, task, palette
 from django.shortcuts import render
 from django.conf import settings
 from django.conf.urls.static import static
@@ -20,13 +20,23 @@ urlpatterns = [
     path("api/session", session.View.as_view()),
     # POST - Create new session (Login) (Any)
     # DELETE - Delete session (Logout) (Authenticated)
+    path("api/session/search", session.SearchView.as_view()),
+    # POST - Search sessions (Authenticated)
+    path("api/session/<int:session>", session.View.as_view()),
+    # DELETE - Delete session (Authenticated)
+    path("api/user/<int:user>/session/<int:session>", session.View.as_view()),
+    # DELETE - Delete session (Admin)
+    path("api/user/session/search", session.UserSearchView.as_view()),
+    # POST - Search sessions (Authenticated)
     path("api/user", user.View.as_view()),  # TODO: User info by id
     # GET - Get user info (Authenticated)
     # POST - Register new user (Any)
-    # TODO: PUT - Edit user info (Authenticated)
+    # PUT - Edit user info (Authenticated)
     # DELTE - Delete user (Authenticated)
-    path("api/user/activate", user.ActivateView.as_view()),
+    path("api/user/<int:user>/activate", user.ActivateView.as_view()),
     # POST - Activate user (Any)
+    path("api/user/<int:user>", user.View.as_view()),
+    # PUT - Edit user data (Admin)
     path("api/user/search", user.SearchView.as_view()),
     # POST - Search all users (Admin)
     path("api/universe", universe.View.as_view()),
@@ -42,13 +52,29 @@ urlpatterns = [
     # POST - Search all dimensions in universe
     path("api/dimension/<int:dimension>", dimension.View.as_view()),
     # GET - Get dimension info (Any)
+    # PUT - Edit dimension (Admin)
     # DELETE - Delete dimension (Admin)
     path("api/dimension/search", dimension.SearchView.as_view()),
     # POST - Search all dimensions (Any)
+    path("api/fractal/<int:fractal>", fractal.View.as_view()),
+    # GET - Get fractal info (Any)
+    # PUT - Edit fractal info (Authenticated)
+    # DELETE - Delete fractal (Authenticated)
     path("api/dimension/<int:dimension>/fractal", fractal.View.as_view()),
     # POST - Add new fractal (Primium)
     path("api/dimension/<int:dimension>/fractal/search", fractal.SearchView.as_view()),
     # POST - Search all fractals in dimension (Any)
+
+    # path("api/api/fractal/<int:fractal>/comment", comment.View.as_view()),
+    # POST - Add new comment (Authenticated)
+
+    # path("api/api/fractal/<int:fractal>/comment/search", comment.SearchView.as_view()),
+    # POST - Search all fractal comments (Any)
+
+    # path("api/api/fractal/<int:fractal>/comment/<int:comment>", comment.View.as_view()),
+    # GET - Get comment info (Any)
+    # DELETE - Delete comment (Authenticated)
+
     path("api/task/search", task.SearchView.as_view()),
     # POST - Search tasks (Authenticated)
     path("api/user/task/search", task.UserSearchView.as_view()),

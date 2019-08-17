@@ -11,6 +11,7 @@ import Register from "./Pages/Register";
 import Profile from "./Pages/Profile";
 import Admin from "./Pages/Admin";
 import Dimension from "./Pages/Dimension";
+import Fractal from "./Pages/Fractal";
 import ActivateEmail from "./Pages/ActivateEmail";
 import NotFound from "./Pages/NotFound";
 
@@ -94,6 +95,7 @@ export default class UI extends Component {
               {/*</LoggedInRequired>*/}
               <Route path="/admin" component={Admin} />
               <Route path="/dimension/:id(\d+)" component={Dimension} />
+              <Route path="/fractal/:id(\d+)" component={Fractal} />
               <Route path="/activate/:user(\d+)/:hash(.+)" component={ActivateEmail} />
               <Route component={NotFound} />
             </Switch>

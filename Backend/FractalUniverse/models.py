@@ -18,41 +18,43 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField("email", unique=True)
     password = models.CharField("password", max_length=256)
     date_joined = models.DateTimeField("registered", auto_now_add=True)
+    is_blocked = models.BooleanField("is_blocked", default=False)
     is_active = models.BooleanField("is_active", default=True)
     is_premium = models.BooleanField("is_premium", default=False)
     is_staff = models.BooleanField("is_staff", default=False)
     objects = UserManager()
     USERNAME_FIELD = "login"
     REQUIRED_FIELDS = ["email", "password"]
+
     class Meta:
         managed=True
 
 
 class AuthToken(models.Model):
-    key = models.CharField("key", max_length=40, primary_key=True)
+    key = models.CharField("key", max_length=40, null=True, blank=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="auth_tokens",
         on_delete=models.CASCADE, verbose_name="user"
     )
     remember = models.BooleanField("remember", default=True)
     created = models.DateTimeField("created", auto_now_add=True)
-    expire_at = models.DateTimeField("expire_at", default=None)
+    expire_at = models.DateTimeField("expire_at", null=True, blank=True)
 
     class Meta:
         verbose_name = "token"
         verbose_name_plural = "tokens"
+        unique_together=("key", "user")
 
     def save(self, *args, **kwargs):
-        if not self.key:
-            self.key = self.generate_key()
-        if self.remember:
-            self.expire_at = timezone.now() + settings.REMEBERED_TOKEN_LIFETIME
-        else:
-            self.expire_at = timezone.now() + settings.TOKEN_LIFETIME
+        if self.key:
+            if self.remember:
+                self.expire_at = timezone.now() + settings.REMEBERED_TOKEN_LIFETIME
+            else:
+                self.expire_at = timezone.now() + settings.TOKEN_LIFETIME
         return super(AuthToken, self).save(*args, **kwargs)
 
     def generate_key(self):
-        return binascii.hexlify(os.urandom(32)).decode()
+        self.key = binascii.hexlify(os.urandom(32)).decode()
 
     def __str__(self):
         return self.key
@@ -91,6 +93,7 @@ class Palette(models.Model):
 class Universe(models.Model):  # Вселенная
     function = models.TextField(max_length=200)  # Формула для просчёта
     initial_value = models.TextField(max_length=40)  # Начальное значение для точки x+1j*y
+    is_active = models.BooleanField(default=True)
     name = models.TextField()
 
 
@@ -99,6 +102,7 @@ class Dimension(models.Model):  # Измерение
         "Universe", related_name="dimensions",
         on_delete=models.CASCADE, verbose_name="universe"
     )  # Указатель на вселенную
+    is_active = models.BooleanField(default=True)
     map = models.ForeignKey(
         "Fractal", related_name="dimensions",
         on_delete=models.CASCADE, verbose_name="fractal",
@@ -119,6 +123,7 @@ class Fractal(models.Model):
         (STATE_CALCULATING, "CALCULATING"),
         (STATE_READY, "FINISHED")
     )
+    is_active = models.BooleanField(default=True)
     state = models.IntegerField(choices=STATES, default=0)  # Статус фрактала (или карты)
     dimension = models.ForeignKey(
         "Dimension", related_name="fractals",
@@ -134,6 +139,54 @@ class Fractal(models.Model):
         on_delete=models.CASCADE, verbose_name="user",
         blank=True, null=True
     )
+
+
+class UserFavorite(models.Model):
+    fractal = models.ForeignKey(
+        "Fractal", related_name="favorites",
+        on_delete=models.CASCADE, verbose_name="fractal"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="favorites",
+        on_delete=models.CASCADE, verbose_name="user"
+    )
+
+    class Meta():
+        unique_together = ("fractal", "user")
+
+
+class FractalRating(models.Model):
+    LIKE = 1
+    DISLIKE = -1
+    RATES = (
+        (LIKE, "Like"),
+        (DISLIKE, "Dislike")
+    )
+    fractal = models.ForeignKey(
+        "Fractal", related_name="ratings",
+        on_delete=models.CASCADE, verbose_name="fractal"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="ratings",
+        on_delete=models.CASCADE, verbose_name="user"
+    )
+    rate = models.SmallIntegerField(choices=RATES)
+
+    class Meta():
+        unique_together = ("fractal", "user")
+
+
+class Comment(models.Model):
+    fractal = models.ForeignKey(
+        "Fractal", related_name="comments",
+        on_delete=models.CASCADE, verbose_name="fractal"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="comments",
+        on_delete=models.CASCADE, verbose_name="user"
+    )
+    date = models.DateTimeField(auto_now_add=True)
+    content = models.TextField()
 
 
 class FractalCalculateTask(models.Model):

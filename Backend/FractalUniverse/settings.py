@@ -65,19 +65,26 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "session.post": "6/minute",
         "session.delete": "1/second",
+        "session-search.post": "1/second",
+        "user-session-search.post": "1/second",
         "user.get": "1/second",
         "user.post": "2/hour",
+        "user.put": "20/minute",
         "user.delete": "1/second",
         "user-activate.post": "1/second",
         "user-search.post": "1/second",
         "universe.post": "1/second",
+        "universe.put": "20/minute",
         "universe.get": "1/second",
         "universe.delete": "1/second",
         "universe-search.post": "1/second",
         "dimension.get": "1/second",
         "dimension.post": "1/second",
+        "dimension.put": "20/minute",
         "dimension.delete": "1/second",
         "dimension-search.post": "1/second",
+        "fractal.get": "1/second",
+        "fractal.put": "20/minute",
         "fractal.post": "2/hour",
         "fractal-search.post": "1/second",
         "task-search.post": "1/second",
@@ -156,6 +163,10 @@ else:
 
 TOKEN_LIFETIME = timedelta(hours=1)
 REMEBERED_TOKEN_LIFETIME = timedelta(weeks=1)
+
+
+# TOKEN_LIFETIME = timedelta(seconds=20)
+# REMEBERED_TOKEN_LIFETIME = timedelta(minutes=2)
 
 GOOGLE_API_AUTH_FILE = os.path.join(BASE_DIR, "GoogleServiceAccount.json")
 

@@ -61,7 +61,12 @@ class DefaultView(APIViewWithPermissions):
 
     @with_permissions((AllowAny,))
     def get(self, request, palette=None):
-        return Response(info.palette(Palette.objects.first()), status=HTTP_200_OK);
+        palette = Palette.objects.first()
+        if not palette:
+            return Response({
+                "detail": _("Palette not found.")
+            }, status=HTTP_404_NOT_FOUND)
+        return Response(info.palette(palette), status=HTTP_200_OK);
 
 
 class View(APIViewWithPermissions):

@@ -69,41 +69,49 @@ export default class Paginator extends Component {
   }
   async search(page) {
     page = page || this.state.page
+    let resetSelect = page != this.state.page
     this.setState({ isLoading: true });
     let result = await this.props.onSearch(this.state.search, page);
     this.setState(Object.assign(result, {
       page,
       isLoading: false,
-      selected: -1
+      selected: resetSelect ? -1 : this.state.selected
     }));
-    this.props.onSelect && this.props.onSelect(null);
+    if (this.props.onSelect) {
+      this.props.onSelect(resetSelect ? null : this.state.rows[this.state.selected])
+    }
   }
   render() {
     return (
       <div className={`paginator ${this.state.isLoading ? "loading " : ""}${this.props.className}`}>
-        <div className="search">
-          <form onSubmit={(event) => {
-            event.preventDefault();
-            this.search(1);
-          }}>
-            <Input placeholder={this.props.searchText} name="search" parent={this} onChange={() => {
-              this.changed = true;
-            }} />
-          </form>
-          <Button onClick={() => {
-            this.search(1);
-          }} withIcon={SearchIcon} />
-        </div>
-        <div className="results">
-          <div className="header">
-            { this.props.header(this.search) }
+        { this.props.searchText && (
+          <div className="search">
+            <form onSubmit={(event) => {
+              event.preventDefault();
+              this.search(1);
+            }}>
+              <Input placeholder={this.props.searchText} name="search" parent={this} onChange={() => {
+                this.changed = true;
+              }} />
+            </form>
+            <Button onClick={() => {
+              this.search(1);
+            }} withIcon={SearchIcon} />
           </div>
+        ) }
+        <div className="results">
+          { this.props.header && (
+            <div className="header">
+              { this.props.header(this.search) }
+            </div>
+          ) }
           { this.state.rows.length != 0 ? (
             this.state.rows.map((element, index) => {
               return (
                 <div key={index} className={`row ${this.state.selected == index ? "selected" : ""}`} onClick={this.props.onSelect && (() => {
-                  this.setState({ selected: index });
-                  this.props.onSelect(this.state.rows[index]);
+                  if (!this.props.onSelect(this.state.rows[index])) {
+                    this.setState({ selected: index });
+                  }
                 })}>
                   { this.props.row(element, this.search) }
                 </div>

@@ -9,11 +9,12 @@ import Button from "../Elements/Button";
 import Input from "../Elements/Input";
 import AsyncButton from "../Elements/AsyncButton";
 import Paginator from "../Elements/Paginator";
-import openDimensionMap from "../Elements/DimensionMap";
+import { openDimensionMap } from "../Elements/DimensionMap";
 
 import EditPalettePopup from "../Popups/EditPalettePopup";
 import PermissionRequired from "../PermissionRequired";
 
+import { formatDate } from "../../logic/utils";
 //
 // import AsyncContentProvider from "../AsyncContentProvider";
 //
@@ -118,14 +119,15 @@ class UniversesTab extends Component {
     super(props);
     this.state = {
       selectedUniverse: null,
-      selectedDimension: null
+      selectedDimension: null,
+      changeFlag: false
     }
   }
   render() {
     return (
       <Fragment>
         <h2> { gettext("Universes") } </h2>
-        <Paginator className="universes-paginator" searchText={ gettext("Name or function") } onSearch={async (keywords, page) => {
+        <Paginator className="universes-paginator" searchText={ gettext("Name or function") } index={this.state.changeFlag} onSearch={async (keywords, page) => {
           let result = await window.FU.searchUniverses(keywords, page);
           return {
             rows: result.universes,
@@ -136,6 +138,9 @@ class UniversesTab extends Component {
             <Fragment>
               <div className="column-id">
                 { gettext("ID") }
+              </div>
+              <div className="column-active">
+                { gettext("Active") }
               </div>
               <div className="column-name">
                 { gettext("Name") }
@@ -158,6 +163,9 @@ class UniversesTab extends Component {
               <div className="column-id">
                 { universe.id }
               </div>
+              <div className="column-active">
+                { universe.active ? gettext("Yes") : gettext("No") }
+              </div>
               <div className="column-name">
                 { universe.name }
               </div>
@@ -177,8 +185,27 @@ class UniversesTab extends Component {
         }} />
         { this.state.selectedUniverse ? (
           <Fragment>
+            { this.state.selectedUniverse.active ? (
+              <AsyncButton onClick={async () => {
+                await window.FU.editUniverse(this.state.selectedUniverse.id, {
+                  active: false
+                });
+                this.setState({ changeFlag: !this.state.changeFlag })
+              }}>
+                { gettext("Disable") }
+              </AsyncButton>
+            ) : (
+              <AsyncButton onClick={async () => {
+                await window.FU.editUniverse(this.state.selectedUniverse.id, {
+                  active: true
+                });
+                this.setState({ changeFlag: !this.state.changeFlag })
+              }}>
+                { gettext("Enable") }
+              </AsyncButton>
+            ) }
             <h2> { gettext("Dimensions") } </h2>
-            <Paginator className="dimensions-paginator" index={this.state.selectedUniverse.id} searchText={ gettext("Name or parameter") } onSearch={async (keywords, page) => {
+            <Paginator className="dimensions-paginator" index={this.state.selectedUniverse.id + "_" + this.state.changeFlag} searchText={ gettext("Name or parameter") } onSearch={async (keywords, page) => {
               let result = await window.FU.searchDimensions(this.state.selectedUniverse.id, keywords, page);
               return {
                 rows: result.dimensions,
@@ -189,6 +216,9 @@ class UniversesTab extends Component {
                 <Fragment>
                   <div className="column-id">
                     { gettext("ID") }
+                  </div>
+                  <div className="column-active">
+                    { gettext("Active") }
                   </div>
                   <div className="column-name">
                     { gettext("Name") }
@@ -211,6 +241,9 @@ class UniversesTab extends Component {
                   <div className="column-id">
                     { dimension.id }
                   </div>
+                  <div className="column-active">
+                    { dimension.active ? gettext("Yes") : gettext("No") }
+                  </div>
                   <div className="column-name">
                     { dimension.name }
                   </div>
@@ -232,6 +265,25 @@ class UniversesTab extends Component {
         ) : null }
         { this.state.selectedDimension ? (
           <Fragment>
+            { this.state.selectedDimension.active ? (
+              <AsyncButton onClick={async () => {
+                await window.FU.editDimension(this.state.selectedDimension.id, {
+                  active: false
+                });
+                this.setState({ changeFlag: !this.state.changeFlag })
+              }}>
+                { gettext("Disable") }
+              </AsyncButton>
+            ) : (
+              <AsyncButton onClick={async () => {
+                await window.FU.editDimension(this.state.selectedDimension.id, {
+                  active: true
+                });
+                this.setState({ changeFlag: !this.state.changeFlag })
+              }}>
+                { gettext("Enable") }
+              </AsyncButton>
+            ) }
             <Button onClick={() => {
               openDimensionMap(this.state.selectedDimension);
             }}> { gettext("Open map") } </Button>
@@ -247,6 +299,9 @@ class UniversesTab extends Component {
                   <Fragment>
                     <div className="column-id">
                       { gettext("ID") }
+                    </div>
+                    <div className="column-active">
+                      { gettext("Active") }
                     </div>
                     <div className="column-x">
                       { gettext("X") }
@@ -269,6 +324,9 @@ class UniversesTab extends Component {
                     <div className="column-id">
                       { fractal.id }
                     </div>
+                    <div className="column-active">
+                      { fractal.active ? gettext("Yes") : gettext("No") }
+                    </div>
                     <div className="column-x">
                       { fractal.x }
                     </div>
@@ -283,9 +341,32 @@ class UniversesTab extends Component {
                     </div>
                   </Fragment>
                 )
-              }} onSelect={(dimension) => {
-                this.setState({ selectedFractal: dimension });
+              }} onSelect={(fractal) => {
+                this.setState({ selectedFractal: fractal });
               }} />
+              { this.state.selectedFractal ? (
+                <Fragment>
+                  { this.state.selectedFractal.active ? (
+                    <AsyncButton onClick={async () => {
+                      await window.FU.editFractal(this.state.selectedFractal.id, {
+                        active: false
+                      });
+                      this.setState({ changeFlag: !this.state.changeFlag })
+                    }}>
+                      { gettext("Disable") }
+                    </AsyncButton>
+                  ) : (
+                    <AsyncButton onClick={async () => {
+                      await window.FU.editFractal(this.state.selectedFractal.id, {
+                        active: true
+                      });
+                      this.setState({ changeFlag: !this.state.changeFlag })
+                    }}>
+                      { gettext("Enable") }
+                    </AsyncButton>
+                  ) }
+                </Fragment>
+              ) : null }
           </Fragment>
         ) : null }
       </Fragment>
@@ -366,13 +447,14 @@ class UsersTab extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedUser: null
+      selectedUser: null,
+      changeFlag: false
     }
   }
   render() {
     return (
       <div className="users-tab">
-        <Paginator className="users-paginator" searchText={ gettext("Name") } onSearch={async (keywords, page) => {
+        <Paginator className="users-paginator" searchText={ gettext("Name") } index={this.state.changeFlag} onSearch={async (keywords, page) => {
           let result = await window.FU.searchUsers(keywords, page);
           return {
             rows: result.users,
@@ -393,6 +475,9 @@ class UsersTab extends Component {
               <div className="column-verified">
                 { gettext("Verified") }
               </div>
+              <div className="column-blocked">
+                { gettext("Blocked") }
+              </div>
               <div className="column-buttons">
               </div>
             </Fragment>
@@ -404,13 +489,16 @@ class UsersTab extends Component {
                 { user.id }
               </div>
               <div className="column-username">
-                { user.login }
+                { user.username }
               </div>
               <div className="column-email">
                 { user.email }
               </div>
               <div className="column-verified">
                 { user.verified ? gettext("Yes") : gettext("No") }
+              </div>
+              <div className="column-blocked">
+                { user.blocked ? gettext("Yes") : gettext("No") }
               </div>
               <div className="column-buttons">
                 <Button withIcon={DeleteIcon} onClick={async () => {
@@ -424,7 +512,35 @@ class UsersTab extends Component {
           this.setState({ selectedUser: user });
         }} />
         { this.state.selectedUser && (
-          <div> { this.state.selectedUser.id } </div>
+          <Fragment>
+            { !this.state.selectedUser.verified && (
+              <AsyncButton onClick={async () => {
+                await window.FU.activateEmail(this.state.selectedUser.id);
+                this.setState({ changeFlag: !this.state.changeFlag })
+              }}>
+                { gettext("Activate") }
+              </AsyncButton>
+            ) }
+            { this.state.selectedUser.blocked ? (
+              <AsyncButton onClick={async () => {
+                await window.FU.editUser(this.state.selectedUser.id, {
+                  blocked: false
+                });
+                this.setState({ changeFlag: !this.state.changeFlag })
+              }}>
+                { gettext("Unblock") }
+              </AsyncButton>
+            ) : (
+              <AsyncButton onClick={async () => {
+                await window.FU.editUser(this.state.selectedUser.id, {
+                  blocked: true
+                });
+                this.setState({ changeFlag: !this.state.changeFlag })
+              }}>
+                { gettext("Block") }
+              </AsyncButton>
+            ) }
+          </Fragment>
         ) }
       </div>
     )
@@ -473,6 +589,80 @@ class TasksTab extends Component {
   }
 }
 
+class SessionsTab extends Component {
+  render() {
+    return (
+      <Paginator className="sessions-paginator" searchText={ gettext("Date") } onSearch={async (keywords, page) => {
+        let result = await window.FU.searchSessions(keywords, page);
+        return {
+          rows: result.sessions,
+          maxPages: result.maxPages
+        }
+      }} header={(search) => {
+        return (
+          <Fragment>
+            <div className="column-id">
+              { gettext("ID") }
+            </div>
+            <div className="column-user">
+              { gettext("User") }
+            </div>
+            <div className="column-created">
+              { gettext("Created") }
+            </div>
+            <div className="column-remember">
+              { gettext("Remember") }
+            </div>
+            <div className="column-expireAt">
+              { gettext("Expire at") }
+            </div>
+            <div className="column-buttons">
+            </div>
+          </Fragment>
+        )
+      }} row={(session, search) => {
+        let currentSession = session.key == window.FU.token ? " current" : "";
+        return (
+          <Fragment>
+            <div className={`column-id${currentSession}`}>
+              { session.id }
+            </div>
+            <div className={`column-user${currentSession}`}>
+              { session.user }
+            </div>
+            <div className={`column-created${currentSession}`}>
+              { formatDate(session.created) }
+            </div>
+            <div className={`column-created${currentSession}`}>
+              { session.remember ? gettext("Yes") : gettext("No") }
+            </div>
+            <div className={`column-expireAt${currentSession}`}>
+              { session.expireAt ? formatDate(session.expireAt) : gettext("Deleted") }
+            </div>
+            <div className={`buttons${currentSession}`}>
+              { session.expireAt ? (
+                <Button withIcon={DeleteIcon} onClick={async () => {
+                    await window.FU.deleteSession(session.id, session.user);
+                    if (window.FU.loggedAs && session.key == window.FU.token) {
+                      window.FU.token = null;
+                      window.FU.expireAt = null;
+                      window.FU.loggedAs = null;
+                      localStorage.removeItem("token");
+                      localStorage.removeItem("expire_at");
+                      window.update();
+                    } else {
+                      search();
+                    }
+                }}> </Button>
+              ) : null }
+            </div>
+          </Fragment>
+        )
+      }} />
+    )
+  }
+}
+
 export default class Admin extends PermissionRequired {
   constructor(props) {
     super(props, {
@@ -494,6 +684,9 @@ export default class Admin extends PermissionRequired {
           </Tab>
           <Tab title={ gettext("Tasks") }>
             <TasksTab />
+          </Tab>
+          <Tab title={ gettext("Sessions") }>
+            <SessionsTab />
           </Tab>
           <Tab title={ gettext("Config") }>
             Tab with config

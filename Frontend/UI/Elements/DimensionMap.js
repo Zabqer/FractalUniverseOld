@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import { Link } from "react-router-dom";
 
 import { elementOffset } from "../../logic/utils";
 
@@ -31,6 +32,7 @@ export default class Map extends Component {
   }
   render() {
     let finished = this.state.map.state == "FINISHED";
+    console.log(this.props.dimension)
     return (
       <div className="dimension-map">
         { finished ? (
@@ -48,6 +50,18 @@ export default class Map extends Component {
                   <div className="y-rail" style={{left: `${this.state.x * 100}%` }}> </div>
                 </Fragment>
               ) : null }
+              { Object.values(this.props.dimension.fractals).map((fractal) => {
+                if (fractal.id == this.props.dimension.map.id) return;
+                return (
+                  <div className="fractal-point"  key={fractal.id} style={{top: `calc(${fractal.y * 100}% - 3px)`, left: `calc(${fractal.x * 100}% - 3px)`}} onClick={window.hidePopup}>
+                    <Link className="info" to={`/fractal/${fractal.id}`}>
+                      ID: { fractal.id }<br/>
+                      X: { fractal.x }<br/>
+                      Y: { fractal.y }
+                    </Link>
+                  </div>
+                )
+              }) }
             </div>
             { this.props.onSave ? (
               <div className="controls">
@@ -56,8 +70,8 @@ export default class Map extends Component {
               <AsyncButton onClick={async () => {
                 try {
                   let result = await window.FU.addFractal(this.props.dimension.id, this.state.x, this.state.y);
-                    window.hidePopup();
-                    this.props.onSave();
+                  window.hidePopup();
+                  this.props.onSave();
                 } catch (e) {
                   if (e.x) {
                     this.setState({ xError: e.x });
